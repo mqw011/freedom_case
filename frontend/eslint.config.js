@@ -4,7 +4,7 @@ import hooks from 'eslint-plugin-react-hooks'
 import refresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'playwright-report', 'test-results'] },
   {
     files: ['**/*.{js,jsx}'],
     ...js.configs.recommended,
@@ -18,7 +18,7 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...hooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z]' }],
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z]', argsIgnorePattern: '^[A-Z]' }],
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },

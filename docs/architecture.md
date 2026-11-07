@@ -59,3 +59,10 @@ FK, уникальность, JSON и сервисы используют SQLAlc
 Реальный pipeline: JobService закрепляет VersionRead → worker claim/lease → AIOrchestrator загружает DTO и закрывает read transaction → LLMEvaluator/PromptEngine/provider → grounding/semantic audit → EvaluationSubmission(source="ai") → EvaluationService → атомарный commit Evaluation + job. Scoring Engine не получает итоговые числа от LLM.
 
 Новые таблицы: ai_jobs, ai_batches, ai_job_attempts, ai_worker_lease. Подробности и поведение при crash/cancel: [AI jobs](ai-jobs.md), [AI engine](ai-engine.md). Stage 1 snapshots и апелляции не менялись.
+
+
+## Stage 3 frontend
+
+React/HashRouter → предметные Fetch API clients → TanStack Query → страницы и UI components. Backend endpoints и Scoring Engine сохранены. Все агрегаты строятся по полным пагинированным метаданным; полный транскрипт загружается отдельно. Версия для отображения/апелляции определяется evaluation snapshot, а не текущей активной конфигурацией.
+
+Полная структура: [frontend architecture](frontend-architecture.md). Browser integration тестирует реальные FastAPI endpoints на отдельной временной SQLite через `backend/devtools/ui_server.py`; production API не имеет тестовых маршрутов. GPU/worker для этих проверок не нужны. [Stage 4 handoff](runpod-readiness.md).

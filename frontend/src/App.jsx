@@ -1,27 +1,60 @@
-import { HashRouter, NavLink, Route, Routes } from 'react-router-dom'
-import BackendStatus from './components/BackendStatus'
+import { HashRouter, Route, Routes, Link } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ToastProvider } from './components/ui/Toast'
+import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
-import StageThreePage from './pages/StageThreePage'
-
+import Conversations from './pages/Conversations'
+import ConversationDetail from './pages/ConversationDetail'
+import Checklists from './pages/Checklists'
+import Appeals from './pages/Appeals'
+import AppealDetail from './pages/AppealDetail'
+import AIJobs from './pages/AIJobs'
+import AIJobDetail from './pages/AIJobDetail'
+import AIBatchDetail from './pages/AIBatchDetail'
+import Datasets from './pages/Datasets'
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10000,
+      gcTime: 300000,
+      refetchOnWindowFocus: true,
+      retry: (count, error) => count < 1 && (!error.status || error.status >= 500),
+    },
+    mutations: { retry: false },
+  },
+})
 export default function App() {
-  return <HashRouter>
-    <header><div className="brand"><span className="brand-mark">F</span>Freedom Broker <span className="product">CQA</span></div><BackendStatus /></header>
-    <div className="workspace">
-      <nav aria-label="Основная навигация">
-        <NavLink to="/" end>Обзор</NavLink>
-        <NavLink to="/conversations">Диалоги</NavLink>
-        <NavLink to="/checklists">Чек-листы</NavLink>
-        <NavLink to="/appeals">Апелляции</NavLink>
-      </nav>
-      <main><Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/conversations" element={<StageThreePage page="conversations" />} />
-        <Route path="/conversations/:id" element={<StageThreePage page="details" />} />
-        <Route path="/checklists" element={<StageThreePage page="checklist" />} />
-        <Route path="/appeals" element={<StageThreePage page="appeals" />} />
-        <Route path="*" element={<section><h1>Страница не найдена</h1><NavLink to="/">Вернуться к обзору</NavLink></section>} />
-      </Routes></main>
-    </div>
-    <footer>Freedom Broker · Conversation Quality Analytics · Stage 1</footer>
-  </HashRouter>
+  return (
+    <QueryClientProvider client={client}>
+      <ToastProvider>
+        <HashRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="conversations" element={<Conversations />} />
+              <Route path="conversations/:id" element={<ConversationDetail />} />
+              <Route path="evaluations/:id" element={<ConversationDetail evaluationRoute />} />
+              <Route path="checklists" element={<Checklists />} />
+              <Route path="checklists/:id" element={<Checklists />} />
+              <Route path="appeals" element={<Appeals />} />
+              <Route path="appeals/:id" element={<AppealDetail />} />
+              <Route path="ai-jobs" element={<AIJobs />} />
+              <Route path="ai-jobs/:id" element={<AIJobDetail />} />
+              <Route path="ai-batches/:id" element={<AIBatchDetail />} />
+              <Route path="datasets" element={<Datasets />} />
+              <Route
+                path="*"
+                element={
+                  <section>
+                    <h1>Страница не найдена</h1>
+                    <Link to="/">Вернуться к обзору</Link>
+                  </section>
+                }
+              />
+            </Route>
+          </Routes>
+        </HashRouter>
+      </ToastProvider>
+    </QueryClientProvider>
+  )
 }

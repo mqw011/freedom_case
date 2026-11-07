@@ -234,3 +234,7 @@ def protect_snapshots(session, flush_context, instances):
     for obj in session.deleted:
         if isinstance(obj, (*immutable, Evaluation, Appeal)):
             raise DomainError(409, "immutable_history", "Historical records cannot be deleted")
+
+
+# Register AI tables in the shared metadata; Stage 1 snapshots remain unchanged.
+from app.models.ai import AIBatch, AIJob, AIJobAttempt, AIWorkerLease  # noqa: E402, F401

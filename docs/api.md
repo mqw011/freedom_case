@@ -145,3 +145,7 @@ curl --fail-with-body -X POST http://127.0.0.1:8000/api/appeals/1/decision \
 - 500: непредвиденная внутренняя ошибка с безопасным общим сообщением.
 
 Авторизации нет по условиям Stage 1. Для будущего frontend заявитель и проверяющий различаются вызываемыми действиями, не вымышленными серверными ролями.
+
+## AI Stage 2
+
+AI job/batch API, статусы, polling, retry/cancel, health и frontend DTO описаны в [ai-jobs.md](ai-jobs.md). Endpoint `/evaluations` остаётся ручным/test; `source=ai` туда передавать нельзя. Автоматический анализ запускается `POST /api/ai/evaluations` с conversation_id, без готовых результатов.

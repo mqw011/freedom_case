@@ -1,0 +1,131 @@
+{
+  "model": "qwen3:4b",
+  "provider": "ollama",
+  "context_length": 24576,
+  "summary": {
+    "sample_size": 3,
+    "completed": 0,
+    "failed": 3,
+    "valid_json_rate": 0.0,
+    "schema_validation_rate": 0.0,
+    "criterion_completion_rate": 0.0,
+    "evidence_validity_rate": null,
+    "criterion_agreement": null,
+    "na_agreement": null,
+    "score_mae": null,
+    "critical_precision": null,
+    "critical_recall": null,
+    "mean_latency_seconds": 120.12,
+    "failures_by_language": {
+      "RU": 1,
+      "KZ": 1,
+      "EN": 1
+    },
+    "by_language": {
+      "RU": {
+        "cases": 1,
+        "completed": 0,
+        "criterion_agreement": null
+      },
+      "KZ": {
+        "cases": 1,
+        "completed": 0,
+        "criterion_agreement": null
+      },
+      "EN": {
+        "cases": 1,
+        "completed": 0,
+        "criterion_agreement": null
+      }
+    }
+  },
+  "cases": [
+    {
+      "case": "ru_good",
+      "language": "RU",
+      "status": "failed",
+      "error_code": "provider_timeout",
+      "latency_seconds": 120.13,
+      "metrics": {
+        "requests": 1,
+        "successful_json": 0,
+        "assessment_requests": 1,
+        "schema_valid": 0,
+        "complete_results": 0,
+        "grounded_results": 0,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": null,
+        "output_tokens": null,
+        "latency_ms": 0,
+        "errors": [
+          "provider_timeout"
+        ],
+        "review_codes": [],
+        "response_modes": []
+      }
+    },
+    {
+      "case": "kz_good",
+      "language": "KZ",
+      "status": "failed",
+      "error_code": "provider_timeout",
+      "latency_seconds": 120.11,
+      "metrics": {
+        "requests": 1,
+        "successful_json": 0,
+        "assessment_requests": 1,
+        "schema_valid": 0,
+        "complete_results": 0,
+        "grounded_results": 0,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": null,
+        "output_tokens": null,
+        "latency_ms": 0,
+        "errors": [
+          "provider_timeout"
+        ],
+        "review_codes": [],
+        "response_modes": []
+      }
+    },
+    {
+      "case": "en_good",
+      "language": "EN",
+      "status": "failed",
+      "error_code": "provider_timeout",
+      "latency_seconds": 120.12,
+      "metrics": {
+        "requests": 1,
+        "successful_json": 0,
+        "assessment_requests": 1,
+        "schema_valid": 0,
+        "complete_results": 0,
+        "grounded_results": 0,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": null,
+        "output_tokens": null,
+        "latency_ms": 0,
+        "errors": [
+          "provider_timeout"
+        ],
+        "review_codes": [],
+        "response_modes": []
+      }
+    }
+  ],
+  "verified_at": "2026-11-07",
+  "hardware": "Intel Core i5-10300H CPU; NVIDIA GPU unavailable after Xid 79",
+  "run_settings": {
+    "timeout_seconds": 120,
+    "max_retries": 0,
+    "max_repairs": 0,
+    "max_output_tokens": 2048,
+    "temperature": 0,
+    "seed": 42,
+    "semantic_review": true
+  },
+  "limitation": "All sampled full evaluations timed out. No semantic quality conclusion is supported."
+}

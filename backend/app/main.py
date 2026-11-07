@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -6,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
 
-from app.api import appeals, checklists, conversations, datasets, evaluations, health
+from app.api import ai, appeals, checklists, conversations, datasets, evaluations, health
 from app.core.config import Settings, get_settings
 from app.core.database import build_engine
 from app.core.exceptions import configure_logging, install_handlers
@@ -20,14 +21,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        yield
-        engine.dispose()
+        worker = task = None
+        if settings.ai_auto_start_worker and settings.ai_job_enabled:
+            from app.ai.worker import Worker
+
+            worker = Worker(app.state.session_factory, settings)
+            task = asyncio.create_task(worker.run())
+        try:
+            yield
+        finally:
+            if worker:
+                worker.stop.set()
+                await task
+            engine.dispose()
 
     app = FastAPI(
         title="Freedom Broker CQA",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
-        description="Stage 1: structured manual evaluations. AI arrives in Stage 2.",
+        description="CQA: versioned evaluations, appeals and durable local-first AI jobs.",
         responses={code: {"model": ErrorResponse} for code in (400, 404, 409, 422, 502, 503)},
     )
     app.state.settings = settings
@@ -57,6 +69,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     for router in (
         health.router,
+        ai.router,
         datasets.router,
         conversations.router,
         checklists.router,

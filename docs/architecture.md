@@ -16,7 +16,7 @@ flowchart LR
     Source[Organizer API / JSON file] --> Import[DatasetImportService]
     Import --> DB[(SQLAlchemy / SQLite)]
     Client[Manual client] --> DTO[EvaluationSubmission]
-    AI[Future AIEvaluator] -. StructuredEvaluation .-> DTO
+    AI[LLMEvaluator / durable worker] -- StructuredEvaluation --> DTO
     DTO --> Evidence[EvidenceValidator]
     Evidence --> Score[Scoring Engine]
     Score --> DB
@@ -52,10 +52,10 @@ UTC даты хранятся через UTCDateTime. Decimal хранится �
 
 FK, уникальность, JSON и сервисы используют SQLAlchemy, без SQLite-upsert в бизнес-логике. Особенности SQLite BEGIN/PRAGMA изолированы в `core/database.py`; циклический FK активной версии отдельно создаётся для диалектов с ALTER. PostgreSQL потребует драйвер, URL и отдельную проверку миграций, а не переписывание Scoring Engine.
 
-## Подготовка AI
+## AI Stage 2
 
-`AIEvaluator` — Protocol без фиктивного адаптера. Вход `EvaluationContext` включает детальный диалог с message IDs и VersionRead с условиями N/A/шкалами. Выход `StructuredEvaluation` содержит только ответы, объяснения и evidence. JSON Schema доступна через `model_json_schema()`.
+`AIEvaluator` — Protocol; реальная реализация — `LLMEvaluator`. Вход `EvaluationContext` включает детальный диалог с message IDs и VersionRead с условиями N/A/шкалами. Выход `StructuredEvaluation` содержит только ответы, объяснения и evidence. JSON Schema доступна через `model_json_schema()`.
 
-Будущий адаптер отвечает за транспорт, RU/KZ/EN, prompts, retries, деление длинного контекста и объединение результатов. Он создаёт `EvaluationSubmission(source="ai")` и вызывает `EvaluationService.create()`. Scoring Engine не должен получать готовые итоговые числа от LLM. Jobs/attempts/model metadata добавляются отдельными сущностями на Stage 2.
+Реальный pipeline: JobService закрепляет VersionRead → worker claim/lease → AIOrchestrator загружает DTO и закрывает read transaction → LLMEvaluator/PromptEngine/provider → grounding/semantic audit → EvaluationSubmission(source="ai") → EvaluationService → атомарный commit Evaluation + job. Scoring Engine не получает итоговые числа от LLM.
 
-Официальные технические источники: [SQLAlchemy: SQLite transactions и foreign keys](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html), [FastAPI testing](https://fastapi.tiangolo.com/tutorial/testing/), [Vite guide](https://vite.dev/guide/).
+Новые таблицы: ai_jobs, ai_batches, ai_job_attempts, ai_worker_lease. Подробности и поведение при crash/cancel: [AI jobs](ai-jobs.md), [AI engine](ai-engine.md). Stage 1 snapshots и апелляции не менялись.

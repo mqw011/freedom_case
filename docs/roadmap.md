@@ -4,22 +4,17 @@
 
 Импорт API/файла, SQLite и миграции, точный seed, версии чек-листа, Decimal scoring, ручные/test результаты, evidence, апелляции с историей, тесты и React foundation. Настоящий DEV API проверен 2026-11-07: 65 диалогов и 1 268 реплик импортированы и сверены с источником. Подписанный endpoint хранится только в локальном окружении; новым установкам требуется собственная конфигурация доступа.
 
-## Stage 2 — AI
+## Stage 2 — реализация AI
 
-1. Реализовать `AIEvaluator.evaluate(EvaluationContext) -> StructuredEvaluation` в отдельном адаптере.
-2. Использовать Settings `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` для Ollama локально или OpenAI-compatible endpoint на RunPod. Никаких hardcoded адресов/секретов.
-3. Передавать JSON Schema StructuredEvaluation, точную версию критериев, языки RU/KZ/EN и внутренние message IDs. Добавить model/prompt version metadata.
-4. Проверять структурированные ответы и evidence, повторять только невалидные попытки с ограничением; отсутствие доказательств не подменять выдуманными цитатами.
-5. Дополнить EvidenceValidator семантикой N/A/отсутствующего действия. Существующие проверки FK, диапазона и точной цитаты сохранить.
-6. Передавать `EvaluationSubmission(source="ai")` в `EvaluationService.create()`. Итог всегда считает текущий Scoring Engine. Публичный маршрут AI-запуска должен создавать job, а не принимать произвольный итоговый балл.
-7. Добавить job/attempt tables, статусы, идемпотентность повторной оценки, ограничение параллельности, retries и пакетную обработку. Redis/Celery не обязательны; выбор зависит от реальной нагрузки.
-8. Длинные диалоги обрабатывать с сохранением оригинальных message IDs и последующим общим выводом по критериям. Протокол транскрипта звонка уже поддерживает ISO timestamps и audio_url; STT — отдельный адаптер при необходимости.
+Реализованы Ollama и OpenAI-compatible transport, динамические prompts, строгие DTO, grounding, semantic audit, контекстные окна, durable jobs/batches/attempts, lease recovery и CLI. Используется существующий EvaluationService и неизменённый Scoring Engine. См. [инженерный отчёт](../README_STAGE2.md), [качество и ограничения](ai-evaluation-quality.md).
+
+Следующее улучшение качества — независимая экспертная разметка реальных обезличенных примеров, более мощная модель при достаточных ресурсах и сравнение по языкам; смена модели не требует переписывать scoring.
 
 ## Stage 3 — интерфейс
 
 Развить подготовленные маршруты: Dashboard, Conversations с фильтрами/пагинацией, ConversationDetails с транскриптом/evidence/аудио, ChecklistEditor с preview/новой версией/активацией, Appeals с разделением действий заявителя и проверяющего. UI должен явно показывать initial/final и историю решений. Не выдавать manual/test за AI-анализ.
 
-API-клиент находится в `frontend/src/api/client.js`; ошибки имеют общий envelope. Относительные ассеты и HashRouter подготовлены для встраивания; адаптация Dynamics 365 должна учитывать origin и политику встраивания принимающей системы.
+API-клиенты находятся в `frontend/src/api/client.js` и `frontend/src/api/ai.js`; ошибки имеют общий envelope. Относительные ассеты и HashRouter подготовлены для встраивания; адаптация Dynamics 365 должна учитывать origin и политику встраивания принимающей системы.
 
 ## Stage 4 — эксплуатация
 

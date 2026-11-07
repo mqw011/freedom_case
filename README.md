@@ -1,25 +1,27 @@
 # Freedom Broker — Conversation Quality Analytics
 
-CQA хранит клиентские диалоги, версии чек-листов, оценки с доказательствами и историю апелляций. **Stage 1 реализует backend и детерминированную бизнес-логику. Автоматический AI-анализ появится на Stage 2.**
+CQA хранит клиентские диалоги, версии чек-листов, оценки с доказательствами и историю апелляций. **Stage 1 реализует хранение и бизнес-логику; Stage 2 добавляет локальную AI-оценку через Ollama, проверку доказательств и постоянную очередь заданий.**
 
-На Stage 1 человек или тестовый клиент передаёт структурированные ответы по критериям. Backend валидирует ответы, проверяет ссылки на реплики, рассчитывает баллы и сохраняет результат. Никаких случайных оценок, скрытых LLM-вызовов и загрузок моделей при запуске нет.
+Ручной API принимает структурированные ответы по критериям. AI API ставит задания в очередь; отдельный worker получает ответы модели и использует тот же сервис сохранения. Backend валидирует ответы, проверяет ссылки на реплики, рассчитывает баллы и сохраняет результат. Никаких случайных оценок, скрытых LLM-вызовов и загрузок моделей при запуске нет.
 
 ## Состав
 
 - Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic, SQLite, HTTPX, Uvicorn.
 - React, Vite, JavaScript, Fetch API, HashRouter. Минимальная страница и статус backend; рабочие интерфейсы разделов относятся к Stage 3.
 - Pytest, Ruff, ESLint; зависимости закреплены в `backend/uv.lock` и `frontend/package-lock.json`.
-- 12 таблиц: datasets, conversations, messages, checklists, checklist_versions, criteria, evaluations, criterion_results, evidence, appeals, appeal_decisions и служебная alembic_version.
+- Схема Stage 1 дополнена ai_jobs, ai_batches, ai_job_attempts и ai_worker_lease; миграции сохраняют существующие диалоги и оценки.
 
 ```text
 backend/app/api → Pydantic DTO → сервисы → SQLAlchemy → SQLite
                                      ↓
                           EvidenceValidator → Scoring Engine
 frontend → Fetch API → /api
-Stage 2: AIEvaluator → StructuredEvaluation → тот же сервис оценки
+AI worker → AIEvaluator → StructuredEvaluation → тот же сервис оценки
 ```
 
-Подробности: [архитектура](docs/architecture.md), [API](docs/api.md), [расчёт](docs/scoring.md), [roadmap](docs/roadmap.md), [отчёт Stage 1](README_STAGE1.md).
+**Проверка Stage 2 пока PARTIAL:** аппаратный отказ GPU и timeout CPU не позволили завершить обязательные real inference проверки. Подробности — в [отчёте Stage 2](README_STAGE2.md).
+
+Подробности: [архитектура](docs/architecture.md), [API](docs/api.md), [расчёт](docs/scoring.md), [roadmap](docs/roadmap.md), [отчёт Stage 1](README_STAGE1.md), [запуск Stage 2](README_STAGE2.md), [AI engine](docs/ai-engine.md), [AI jobs](docs/ai-jobs.md).
 
 ## Требования для CachyOS
 
@@ -62,7 +64,7 @@ LOG_LEVEL=INFO
 - `CORS_ORIGINS`: список разрешённых origin через запятую. `http://localhost:5173` и `http://127.0.0.1:5173` — разные origin.
 - `DATASET_API_URL`: доверенный адрес организаторов; пуст по умолчанию. Поддерживает `{group_id}` в пути/строке запроса. Без шаблона query-параметр `group_id` добавляется или заменяется с сохранением остальных параметров, включая подпись.
 - `DATASET_API_TIMEOUT`: HTTP timeout в секундах; `IMPORT_MAX_BYTES` ограничивает размер файла и ответа внешнего API.
-- `LLM_*`: только конфигурация будущего адаптера, сейчас не используется для запросов.
+- `LLM_*`, `AI_*`: параметры inference и очереди, полный список в `.env.example` и [AI engine](docs/ai-engine.md). По умолчанию используется локальный Ollama; backend не скачивает модель и не запускает worker автоматически.
 
 Секреты, `.env`, базы, `.venv`, `node_modules` и сборки исключены из Git.
 
@@ -175,13 +177,13 @@ git diff --check
 
 - Настоящий DEV API проверен, но подписанная ссылка и импортированные диалоги доступны только в локальном окружении и не поставляются с Git-репозиторием. Новая установка требует собственного разрешённого доступа к API.
 - Авторизации нет по условиям хакатона. Базовый запуск слушает localhost.
-- Нет LLM, STT, фоновой очереди, пакетного AI-анализа и полноценного интерфейса оценки. Аудио хранится ссылкой.
-- Проверка evidence структурная: чужие/несуществующие сообщения, неверный диапазон и неточная цитата отклоняются. Семантическая достоверность оценки, условия N/A и утверждения об отсутствии действия требуют человека или будущего AI.
+- STT и полноценный интерфейс оценки ещё не реализованы. Аудио хранится ссылкой; AI оценивает существующий транскрипт.
+- Структурные evidence-проверки дополнены семантическим AI-аудитом. Это не заменяет экспертный контроль, особенно для KZ и непроверенных финансовых утверждений.
 - SQLite подходит для локального MVP; при конкурентной записи клиент может получить `409`/`503` и должен обновить данные перед повтором. PostgreSQL в Stage 1 не установлен и не тестировался.
 - Saved versions неизменяемы; изменения создаются новой полной версией. Версия с несогласованной суммой весов может храниться, но не активироваться и не использоваться для оценки.
 
 ## Следующие этапы
 
-Stage 2: Ollama/Qwen или OpenAI-compatible API, JSON Schema, Evidence Validator с семантической проверкой, retries, обработка длинных диалогов, задания пакетной оценки. Вход — `EvaluationContext`, выход — `StructuredEvaluation`; внутренний `EvaluationSubmission(source="ai")` проходит через уже существующий `EvaluationService` без изменения Scoring Engine.
+Stage 2 реализует Ollama/Qwen и OpenAI-compatible transport, JSON Schema, семантическую проверку evidence, retries, длинные диалоги и пакетные задания. Вход — `EvaluationContext`, выход — `StructuredEvaluation`; внутренний `EvaluationSubmission(source="ai")` проходит через уже существующий `EvaluationService` без изменения Scoring Engine.
 
 Stage 3: Dashboard, Conversations, детали/evidence/аудио, редактор чек-листа, Appeals. Stage 4: расширенные интеграционные проверки, Docker, RunPod, HTTPS и эксплуатационная документация.

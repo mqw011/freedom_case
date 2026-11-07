@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+from urllib.parse import quote, unquote_plus, urlsplit, urlunsplit
 
 import httpx
 from pydantic import ValidationError
@@ -13,6 +14,21 @@ from app.models import Conversation, Dataset, Message
 from app.schemas.datasets import DatasetEnvelope, DatasetRead, ImportReport
 
 logger = logging.getLogger("cqa.import")
+
+
+def dataset_url_for_group(configured_url: str, group_id: str) -> str:
+    """Set the group without discarding or re-encoding signed query parameters."""
+    encoded_group = quote(group_id, safe="")
+    if "{group_id}" in configured_url:
+        return configured_url.replace("{group_id}", encoded_group)
+    parts = urlsplit(configured_url)
+    query = [
+        part
+        for part in parts.query.split("&")
+        if part and unquote_plus(part.partition("=")[0]) != "group_id"
+    ]
+    query.append(f"group_id={encoded_group}")
+    return urlunsplit(parts._replace(query="&".join(query)))
 
 
 class DatasetImportService:
@@ -48,13 +64,12 @@ class DatasetImportService:
         configured_url = self.settings.dataset_api_url
         if not configured_url:
             raise DomainError(503, "dataset_not_configured", "DATASET_API_URL is not configured")
-        params = None if "{group_id}" in configured_url else {"group_id": group_id}
-        url = configured_url.replace("{group_id}", group_id)
+        url = dataset_url_for_group(configured_url, group_id)
         try:
             with httpx.Client(
                 timeout=self.settings.dataset_api_timeout, follow_redirects=False, trust_env=False
             ) as client:
-                with client.stream("GET", url, params=params) as response:
+                with client.stream("GET", url) as response:
                     response.raise_for_status()
                     content = bytearray()
                     for chunk in response.iter_bytes():

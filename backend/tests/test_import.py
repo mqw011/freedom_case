@@ -199,3 +199,24 @@ def test_network_failures(client, app, monkeypatch, error):
     response = client.post("/api/datasets/import", json={"group_id": "DEV"})
     assert response.status_code == 502
     assert "secret-token" not in response.text
+
+
+@pytest.mark.parametrize("group_query", ["", "&group_id=OLD", "&group_id=OLD&group_id=OTHER"])
+def test_signed_query_preserved_without_template(client, app, mock_dataset_api, group_query):
+    # Synthetic signature only; the local server receives the exact original escaping.
+    signed_query = "api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sig=fake%2Btoken%2F%3D"
+    app.state.settings.dataset_api_url = mock_dataset_api["url"] + "?" + signed_query + group_query
+    response = client.post("/api/datasets/import", json={"group_id": "LOCAL-TEST"})
+    assert response.status_code == 201
+    assert mock_dataset_api["requests"] == [f"/dataset?{signed_query}&group_id=LOCAL-TEST"]
+    assert response.json()["inserted"] == 3
+
+
+def test_signed_query_preserved_with_template(client, app, mock_dataset_api):
+    signed_query = "sig=fake%2Btoken%2F%3D&api-version=1"
+    app.state.settings.dataset_api_url = (
+        mock_dataset_api["url"] + "?" + signed_query + "&group_id={group_id}"
+    )
+    response = client.post("/api/datasets/import", json={"group_id": "LOCAL-TEST"})
+    assert response.status_code == 201
+    assert mock_dataset_api["requests"] == [f"/dataset?{signed_query}&group_id=LOCAL-TEST"]

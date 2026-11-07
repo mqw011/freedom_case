@@ -182,3 +182,16 @@ def test_configuration_rejects_unsafe_templates(url):
 
     with pytest.raises(ValidationError):
         Settings(dataset_api_url=url, _env_file=None)
+
+
+def test_signed_url_is_hidden_from_configuration_repr_and_errors():
+    from pydantic import ValidationError
+
+    marker = "synthetic-secret-marker"
+    settings = Settings(dataset_api_url=f"https://example.invalid/api?sig={marker}", _env_file=None)
+    assert marker not in repr(settings)
+    with pytest.raises(ValidationError) as caught:
+        Settings(
+            dataset_api_url=f"https://user:pass@example.invalid/api?sig={marker}", _env_file=None
+        )
+    assert marker not in str(caught.value)

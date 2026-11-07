@@ -4,7 +4,7 @@
 
 ## Статус реализации
 
-**Complete для объёма Stage 1.** Реализованы FastAPI backend, SQLite/SQLAlchemy, две Alembic-миграции, начальный чек-лист, API/file import, версии, Scoring Engine, оценки, апелляции и React foundation. Настоящий DEV endpoint не предоставлен; импорт 65 реальных диалогов не заявляется.
+**Complete для объёма Stage 1.** Реализованы FastAPI backend, SQLite/SQLAlchemy, две Alembic-миграции, начальный чек-лист, API/file import, версии, Scoring Engine, оценки, апелляции и React foundation. Настоящий DEV API проверен 7 ноября 2026 года: все 65 диалогов импортированы в локальную SQLite, целостность и повторный импорт подтверждены.
 
 Состояние отправки и commit hash следует проверять по Git, поскольку хэш нельзя включить в содержимое самого коммита:
 
@@ -30,7 +30,7 @@ git ls-remote origin refs/heads/main refs/tags/stage-1-core-complete
 
 ## Проверки
 
-- **153 теста пройдены, 0 провалено.** Полный набор выполнен также в отдельном чистом venv.
+- **158 тестов пройдены, 0 провалено** в последнем регрессионном прогоне. Исходный набор из 153 тестов ранее выполнен также в отдельном чистом venv.
 - Ruff: успешно для backend и вспомогательного скрипта.
 - Alembic: upgrade с нуля, downgrade/upgrade на одноразовой БД, проверка соответствия модели миграциям.
 - Frontend: `npm install`, `npm run lint`, `npm run build` успешны; `npm audit` сообщает 0 уязвимостей в закреплённом наборе зависимостей.
@@ -50,8 +50,49 @@ git ls-remote origin refs/heads/main refs/tags/stage-1-core-complete
 4. Начальные/финальные Decimal значения API — строки. Raw timestamps остаются оригинальными строками.
 5. Ручные результаты требуют объяснения; evidence необязателен, но все переданные ссылки и цитаты проверяются. Семантический анализ отсутствующего действия относится к Stage 2.
 6. Сохранённые версии не редактируются. Неактивную версию с несогласованной суммой можно сохранить, но нельзя активировать или оценивать по ней.
-7. Рабочие страницы, AI/STT/очередь, Docker/RunPod/HTTPS относятся к следующим этапам. Реальные DEV данные отсутствуют. PostgreSQL не развёртывался и не тестировался.
+7. Рабочие страницы, AI/STT/очередь, Docker/RunPod/HTTPS относятся к следующим этапам. Реальные DEV данные хранятся только локально, вне Git. PostgreSQL не развёртывался и не тестировался.
 
 ## Готовность к Stage 2
 
 `AIEvaluator` принимает `EvaluationContext`, возвращает `StructuredEvaluation`. JSON Schema экспортируется из Pydantic. Настройки Ollama/OpenAI-compatible endpoint уже предусмотрены. AI-адаптер передаёт `EvaluationSubmission(source="ai")` в `EvaluationService`, который выполняет EvidenceValidator → Scoring Engine → persist. Этот путь проверен отдельным тестом с переданными структурированными ответами; никакой фиктивной inference-реализации нет.
+
+
+## Проверка настоящего DEV API — 2026-11-07
+
+Реальный GET через `DatasetImportService.fetch("DEV")` вернул HTTP 200, isSuccess=true, пустое error, dataset_group_id=DEV; объявленное и фактическое количество записей — 65. В локальной конфигурации исправлена опечатка имени переменной `DATASET_API_UR` → `DATASET_API_URL`; существующий подписанный адрес и его шаблон группы сохранены без изменений. `.env` не входит в Git.
+
+Через работающий backend выполнены два `POST /api/datasets/import`:
+
+- Первый: HTTP 201, received=65, inserted=65, skipped=0, warnings=0.
+- Повторный: HTTP 201, received=65, inserted=0, skipped=65, warnings=0.
+- Локальная БД `backend/data/cqa.db`: dataset DEV, 65 диалогов, 1 268 сообщений. Повторная загрузка не изменила количество и контрольную сумму сообщений, включая их внутренние IDs и позиции.
+
+Обезличенная статистика:
+
+- Три языка: RU — 35, KZ — 15, EN — 15.
+- 60 agent chat и 5 voice call.
+- Реплик на диалог: минимум 11, максимум 115, среднее 19,51.
+- Без сообщений оператора — 0; с системными событиями — 65; с сообщениями бота — 64.
+- У пяти звонков источник предоставил аудиоссылки; все пять сохранены дословно. Аудио не скачивалось.
+
+Полностью сопоставлены исходный ответ, SQLite и detail API для всех 65 диалогов. Расхождений текстов, языка, канала, ролей, временных меток, порядка, количества сообщений и аудиоссылок нет. Внутренние IDs сообщений и пары conversation/message_index уникальны; индексы последовательны от 0, FK-проверка чистая. Непустые транскрипты, допустимые роли, MM:SS для чатов и ISO 8601 с часовым поясом для звонков подтверждены. Пустых/пробельных реплик и символов замены Unicode не обнаружено. Системные события и бот — особенности исходного набора, а не ошибки импорта.
+
+Проверены health/docs/OpenAPI/datasets/conversations (HTTP 200), фильтры всех трёх языков и обоих каналов, пагинация и полный транскрипт через API. Восемь критериев активного чек-листа дословно совпадают с исходной конфигурацией; веса, шкалы и N/A сохранены. Контрольная арифметика — 81.88, включение флага грубой ошибки число не меняет. Новых оценок реальным DEV-диалогам не присваивалось: в наборе остаётся 0 оценок.
+
+Найден и исправлен дефект общего HTTP-импортёра: для URL без шаблона HTTPX заменял всю query-строку при передаче params. Теперь группа добавляется/заменяется без потери остальных параметров и без перекодирования подписи. Четыре регрессионных случая проверяют шаблон, отсутствие группы, существующую и дублирующуюся группу на локальном mock API. Дополнительно подписанный URL исключён из repr настроек и из текста ошибок их валидации; это покрыто пятым новым тестом. Scoring Engine не изменялся.
+
+Регрессия: pytest — 158 passed, 0 failed; Ruff — passed; Alembic upgrade/check — passed, расхождений модели/схемы нет; npm ci/lint/build — passed, audit при установке — 0 уязвимостей. Chromium подтвердил загрузку frontend и соединение с backend без ошибок JavaScript. Автотесты не обращались к настоящему API; три обращения к организаторам были отдельной явно запущенной проверкой: чтение источника, первый импорт, повторный импорт.
+
+Исходный ответ и локальные диагностические результаты находятся только в игнорируемом `backend/data/dev-verification/`. В документацию и Git включены исключительно агрегаты, без текстов, персональных данных, подписанных адресов и аудиоссылок.
+
+## Точные интерфейсы для Stage 2
+
+1. Загрузить диалог через `GET /api/conversations/{id}` либо модель `Conversation`; преобразовать в `app.schemas.datasets.ConversationDetail`. В DTO есть language/channel/audio_url и полный messages: id, message_index, speaker, timestamp_raw, text.
+2. Прочитать `Checklist.active_version_id`, загрузить соответствующий `ChecklistVersion` и преобразовать в `app.schemas.checklists.VersionRead`. В criteria доступны описания, секции, веса, allowed_values/max_score, scale_labels, allow_na/na_condition. При создании задания закреплять этот version_id, а не повторно выбирать активный после inference.
+3. Сформировать `app.services.ai_contract.EvaluationContext(conversation, checklist_version)`. Этот DTO успешно построен для каждого из 65 реальных диалогов, без вызова LLM.
+4. Реализовать `AIEvaluator.evaluate(context) -> StructuredEvaluation`. Использовать `StructuredEvaluation.model_json_schema()` и `StructuredCriterionResult` с criterion_code, answer, explanation, evidence. Возвращать настоящие внутренние message IDs из контекста.
+5. Создать `app.schemas.evaluations.EvaluationSubmission(conversation_id, checklist_version_id, source="ai", results=structured.results)`.
+6. В транзакции Session вызвать `app.services.evaluation_service.EvaluationService.create(submission)`. Сервис уже вызывает `EvidenceValidator.validate(conversation_id, evidence)` и `app.services.scoring_engine.score(criteria, answers)`, затем сохраняет исходный результат. Commit выполняет вызывающий слой/транзакция. Сохранение source=ai проверяется автоматическим тестом только на синтетических данных.
+7. Получить подробный результат через `EvaluationService.detail(evaluation)` либо `GET /api/evaluations/{id}`. Публичный POST оценок на Stage 1 по-прежнему принимает только manual/test; будущий AI job runner использует внутренний DTO/сервис.
+
+**READY FOR STAGE 2.** Блокеров по DEV данным, контрактам, расчёту и сохранению результатов не выявлено. LLM, семантическая проверка evidence и очередь заданий в рамках этой проверки не внедрялись.

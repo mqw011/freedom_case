@@ -6,12 +6,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
 
     app_env: str = "development"
     database_url: str = "sqlite:///./data/cqa.db"
     cors_origins: str = "http://localhost:5173"
-    dataset_api_url: str = ""
+    dataset_api_url: str = Field(default="", repr=False)
     dataset_api_timeout: float = Field(default=30, gt=0, le=300)
     import_max_bytes: int = Field(default=20 * 1024 * 1024, gt=0)
     llm_base_url: str = "http://localhost:11434/v1"

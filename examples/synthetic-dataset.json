@@ -1,0 +1,21 @@
+{
+  "error": "",
+  "isSuccess": true,
+  "data": {
+    "dataset_group_id": "LOCAL-EXAMPLE",
+    "total_records": 1,
+    "records": [
+      {
+        "conversation_id": "synthetic-example-001",
+        "channel": "agent chat",
+        "language": "RU",
+        "audio_url": null,
+        "transcript": [
+          {"timestamp": "00:00", "speaker": "client", "text": "Здравствуйте, где посмотреть тарифы?"},
+          {"timestamp": "00:10", "speaker": "operator", "text": "Здравствуйте! Я Анна. Тарифы доступны в разделе «Тарифы» на сайте компании."},
+          {"timestamp": "00:20", "speaker": "client", "text": "Спасибо."}
+        ]
+      }
+    ]
+  }
+}

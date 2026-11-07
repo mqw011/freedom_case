@@ -1,0 +1,15 @@
+{
+  "conversation_id": 1,
+  "checklist_version_id": 1,
+  "source": "test",
+  "results": [
+    {"criterion_code": "01", "answer": "yes", "explanation": "Учебный ввод для проверки арифметики."},
+    {"criterion_code": "02", "answer": "yes", "explanation": "Учебный ввод для проверки арифметики."},
+    {"criterion_code": "03", "answer": "na", "explanation": "Общий вопрос о тарифах."},
+    {"criterion_code": "04", "answer": "15", "explanation": "Учебный ввод для проверки арифметики."},
+    {"criterion_code": "05", "answer": "yes", "explanation": "Учебный ввод для проверки арифметики."},
+    {"criterion_code": "06", "answer": "7", "explanation": "Учебный ввод для проверки арифметики."},
+    {"criterion_code": "07", "answer": "no", "explanation": "Учебный ввод для проверки арифметики."},
+    {"criterion_code": "08", "answer": "no", "explanation": "Учебный ввод для проверки арифметики."}
+  ]
+}

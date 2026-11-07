@@ -1,0 +1,27 @@
+:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #183b2c; background: #f4f7f3; font-synthesis: none; line-height: 1.6; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 24px 5vw; background: white; border-bottom: 1px solid #dce5dc; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 19px; }
+.brand-mark { display: grid; place-items: center; background: #1c653a; color: white; width: 36px; height: 36px; border-radius: 9px; }
+.product { color: #607466; font-size: 14px; font-weight: 500; border-left: 1px solid #ccd9cd; padding-left: 12px; }
+.connection { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #526b5c; max-width: 480px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #7d8d82; flex-shrink: 0; }
+.online .status-dot { background: #247e40; }
+.offline .status-dot { background: #b74d24; }
+.workspace { display: grid; grid-template-columns: 180px 1fr; max-width: 1400px; padding: 42px 5vw 64px; margin: auto; gap: 55px; min-height: 75vh; }
+nav { display: flex; flex-direction: column; gap: 6px; }
+nav a { padding: 10px 16px; color: #53685b; border-radius: 7px; text-decoration: none; }
+nav a.active { background: #e0ecdf; color: #164528; font-weight: 650; }
+a:focus-visible { outline: 3px solid #73a06b; outline-offset: 3px; }
+.eyebrow { letter-spacing: .15em; font-size: 11px; font-weight: 700; color: #608061; margin: 8px 0 18px; }
+h1 { font-size: clamp(30px, 4vw, 48px); line-height: 1.18; letter-spacing: -.04em; margin: 0 0 24px; font-weight: 650; }
+.lead { color: #576c5f; font-size: 17px; max-width: 720px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+article { padding: 24px; background: white; border: 1px solid #dce5dc; border-radius: 12px; }
+article span { font-size: 12px; color: #628463; }
+h2 { font-size: 19px; margin: 12px 0; }
+article p { font-size: 14px; color: #5a6e60; margin-bottom: 0; }
+.stage-note { font-size: 14px; color: #5a6e60; border-top: 1px solid #d9e2d9; padding-top: 22px; margin-top: 32px; max-width: 850px; }
+footer { padding: 20px 5vw; border-top: 1px solid #dce5dc; color: #67806b; font-size: 12px; }
+@media (max-width: 800px) { .workspace { grid-template-columns: 1fr; gap: 30px; padding-top: 24px; } nav { flex-direction: row; flex-wrap: wrap; } .cards { grid-template-columns: 1fr; } header { gap: 14px; } }

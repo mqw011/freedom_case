@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "freedom-cqa"
+version = "0.1.0"
+description = "Freedom Broker Conversation Quality Analytics — Stage 1"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.121,<1", "pydantic>=2.10,<3", "pydantic-settings>=2.7,<3",
+  "sqlalchemy>=2.0.36,<2.1", "alembic>=1.14,<2", "uvicorn>=0.34,<1",
+  "httpx>=0.28,<1", "python-multipart>=0.0.20,<1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.3,<10", "ruff>=0.11,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/seed/default_checklist.py" = ["E501"]
+"alembic/versions/0002_default_checklist.py" = ["E501"]

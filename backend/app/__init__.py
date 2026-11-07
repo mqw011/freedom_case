@@ -1,0 +1,1 @@
+"""Freedom Broker CQA backend."""

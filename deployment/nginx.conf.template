@@ -46,7 +46,7 @@ http {
         # Vite uses inline styles for chart values. Scripts remain same-origin only.
         add_header Content-Security-Policy $cqa_csp always;
         location /api/ {
-            proxy_pass http://127.0.0.1:8000;
+            proxy_pass http://127.0.0.1:@@API_PORT@@;
             proxy_set_header Host @@HOST@@;
             proxy_set_header X-Forwarded-Proto https;
             proxy_set_header Authorization "";
@@ -57,9 +57,9 @@ http {
             proxy_cache off;
         }
         # Swagger requires CDN scripts. These URLs retain the same mandatory authentication.
-        location = /docs { proxy_pass http://127.0.0.1:8000; proxy_set_header Authorization ""; }
-        location = /openapi.json { proxy_pass http://127.0.0.1:8000; proxy_set_header Authorization ""; }
-        location = /redoc { proxy_pass http://127.0.0.1:8000; proxy_set_header Authorization ""; }
+        location = /docs { proxy_pass http://127.0.0.1:@@API_PORT@@; proxy_set_header Authorization ""; }
+        location = /openapi.json { proxy_pass http://127.0.0.1:@@API_PORT@@; proxy_set_header Authorization ""; }
+        location = /redoc { proxy_pass http://127.0.0.1:@@API_PORT@@; proxy_set_header Authorization ""; }
         location ~ /\. { deny all; }
         location / { try_files $uri $uri/ /index.html; }
     }

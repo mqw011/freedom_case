@@ -174,3 +174,17 @@ def test_service_rejects_root_before_loading_secrets(service, monkeypatch, capsy
     monkeypatch.setattr(service.os, "geteuid", lambda: 0)
     assert service.main() == 1
     assert "production_service_configuration" in capsys.readouterr().err
+
+
+def test_custom_private_api_port_avoids_existing_pod_proxy(tmp_path, service, monkeypatch):
+    config.render(tmp_path, tmp_path / "release", "example.invalid", "qwen3:14b", api_port=18000)
+    assert "127.0.0.1:18000" in (tmp_path / "config/nginx.conf").read_text()
+    assert "127.0.0.1:8000" not in (tmp_path / "config/nginx.conf").read_text()
+    monkeypatch.setattr(sys, "argv", ["service", "--root", str(tmp_path), "api"])
+    monkeypatch.setattr(service.os, "geteuid", lambda: 1000)
+    monkeypatch.setattr(service.os, "umask", lambda mask: None)
+    monkeypatch.setattr(service.os, "chdir", lambda directory: None)
+    command = []
+    monkeypatch.setattr(service.os, "execve", lambda path, args, env: command.extend(args))
+    service.main()
+    assert command[command.index("--port") + 1] == "18000"

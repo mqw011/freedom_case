@@ -47,6 +47,7 @@ def render(
     ollama="/usr/local/bin/ollama",
     mime_types="/etc/nginx/mime.types",
     worker=False,
+    api_port=8000,
 ):
     root, release = safe_path(root), safe_path(release)
     if not re.fullmatch(r"(?=.{1,253}$)[a-z0-9]+(?:[a-z0-9.-]*[a-z0-9])?", host):
@@ -55,6 +56,8 @@ def render(
         raise ValueError("invalid_model_name")
     if not 1024 <= port <= 65535 or port in {8000, 8888, 11434}:
         raise ValueError("invalid_proxy_port")
+    if not 1024 <= api_port <= 65535 or api_port in {port, 8888, 11434}:
+        raise ValueError("invalid_api_port")
     if root == release or release in root.parents:
         raise ValueError("persistent_root_must_not_be_inside_release")
     for child in (
@@ -78,6 +81,7 @@ def render(
         "HOST": host,
         "MODEL": model,
         "PORT": str(port),
+        "API_PORT": str(api_port),
         "PYTHON": str(python),
         "NGINX": str(safe_path(nginx)),
         "OLLAMA": str(safe_path(ollama)),
@@ -105,6 +109,7 @@ def render(
                 "ollama": values["OLLAMA"],
                 "public_host": host,
                 "port": port,
+                "api_port": api_port,
                 "worker_autostart": worker,
             },
             indent=2,
@@ -154,6 +159,7 @@ def main():
     conf.add_argument("--host", required=True)
     conf.add_argument("--model", required=True)
     conf.add_argument("--port", type=int, default=8080)
+    conf.add_argument("--api-port", type=int, default=8000)
     conf.add_argument("--nginx", default="/usr/sbin/nginx")
     conf.add_argument("--ollama", default="/usr/local/bin/ollama")
     conf.add_argument("--mime-types", default="/etc/nginx/mime.types")
@@ -176,6 +182,7 @@ def main():
                 args.ollama,
                 args.mime_types,
                 args.enable_worker,
+                args.api_port,
             )
         print(json.dumps(result))
         return 0

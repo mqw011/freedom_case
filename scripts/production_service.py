@@ -100,7 +100,7 @@ def main():
                 "--host",
                 "127.0.0.1",
                 "--port",
-                "8000",
+                str(runtime.get("api_port", 8000)),
                 "--no-access-log",
                 "--no-proxy-headers",
             ],

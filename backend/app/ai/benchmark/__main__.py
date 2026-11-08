@@ -14,6 +14,7 @@ from app.ai.jobs import PINNED_SETTINGS
 from app.ai.prompt_engine import PROMPT_VERSION
 from app.ai.providers import make_provider
 from app.core.config import Settings
+from app.core.exceptions import configure_logging
 from app.services.scoring_engine import score
 
 
@@ -80,6 +81,7 @@ def summarize(rows):
 
 async def run(args):
     settings = Settings()
+    configure_logging(settings.log_level)
     rows = []
     for name, language, messages, expected in CASES:
         if args.case and name not in args.case:

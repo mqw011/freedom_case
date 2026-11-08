@@ -99,6 +99,9 @@ class FakeProvider:
                 "decisions": [
                     {
                         "criterion_code": r["criterion_code"],
+                        "rationale": "The proposed answer contradicts message 1."
+                        if self.semantic_reject
+                        else "The configured action is supported.",
                         "supported": not self.semantic_reject,
                         "issue": "contradiction" if self.semantic_reject else "none",
                         "needs_human_review": False,

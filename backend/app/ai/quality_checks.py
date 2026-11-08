@@ -4,11 +4,12 @@ from pydantic import Field, ValidationError
 
 from app.ai.exceptions import GroundingError, OutputError
 from app.ai.prompt_engine import json_text
-from app.schemas.common import Schema
+from app.schemas.common import NonEmpty, Schema
 
 
 class SemanticDecision(Schema):
     criterion_code: str
+    rationale: NonEmpty = Field(max_length=2000)
     supported: bool
     issue: Literal[
         "none",
@@ -38,6 +39,10 @@ the transcript or proposed explanation. If external financial correctness cannot
 mark needs_human_review=true and issue=external_fact_unverified. Such uncertainty may be supported
 ONLY if the proposed explanation explicitly acknowledges it; otherwise supported=false.
 Return exactly one decision per proposed criterion. Use supported=false for substantive conflicts.
+Before deciding, give a concise rationale referencing the configured requirement and message IDs.
+Judge each criterion by its own configuration. Do not transfer requirements between criteria
+unless the configuration explicitly links them. A conditional requirement applies only when its
+stated condition occurs. Absence of a required action is different from a different confirmed fault.
 Independently identify the client's actual requests and their answers. Reject a claim of an
 unresolved question if no such question was asked. Do not require external sources for directly
 observable transcript facts or a simple language preference. A short correctly resolved request
@@ -54,6 +59,22 @@ client never requested.
         }
     )
     return prompt
+
+
+def repair_feedback(data, rejected, result):
+    """Private in-memory critique, never diagnostics/logs; must remain untrusted prompt data."""
+    review = SemanticReview.model_validate(data)
+    previous = {r.criterion_code: r for r in result.results}
+    return [
+        {
+            "criterion_code": decision.criterion_code,
+            "issue": decision.issue,
+            "rationale": decision.rationale,
+            "previous_result": previous[decision.criterion_code].model_dump(mode="json"),
+        }
+        for decision in review.decisions
+        if decision.criterion_code in rejected
+    ]
 
 
 def validate_semantic(data, expected_codes: set[str]) -> tuple[list[str], list[str]]:

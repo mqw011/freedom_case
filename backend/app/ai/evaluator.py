@@ -8,7 +8,7 @@ from app.ai.grounding import validate_chunk, validate_grounding
 from app.ai.output_parser import parse_evaluation
 from app.ai.prompt_engine import ChunkReview, PromptEngine
 from app.ai.providers.base import InferenceMetrics, LLMProvider
-from app.ai.quality_checks import SemanticReview, review_prompt, validate_semantic
+from app.ai.quality_checks import SemanticReview, repair_feedback, review_prompt, validate_semantic
 from app.core.config import Settings
 from app.services.ai_contract import EvaluationContext, StructuredEvaluation
 
@@ -39,9 +39,15 @@ class LLMEvaluator:
     async def _assess(self, context, *, codes=None, transcript=None, facts=None):
         expected = {c.code for c in context.checklist_version.criteria} if codes is None else codes
         repair = None
+        feedback = None
         for attempt in range(self.settings.ai_max_repairs + 1):
             messages = self.prompts.build(
-                context, codes=codes, transcript=transcript, facts=facts, repair=repair
+                context,
+                codes=codes,
+                transcript=transcript,
+                facts=facts,
+                repair=repair,
+                review_feedback=feedback,
             )
             try:
                 self.metrics.assessment_requests += 1
@@ -60,6 +66,7 @@ class LLMEvaluator:
                     review = await self._generate(review_messages, self._review_schema(expected))
                     rejected, warnings = validate_semantic(review, expected)
                     if rejected:
+                        feedback = repair_feedback(review, rejected, output)
                         raise GroundingError("semantic_conflict", criteria=tuple(rejected))
                     self.metrics.review_codes.extend(warnings)
                 return output

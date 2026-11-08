@@ -143,7 +143,7 @@ def test_backup_listener_acknowledges_success_and_failure_without_secrets(
     assert "private contents" not in stderr.getvalue()
 
 
-@pytest.mark.parametrize("name", ["api", "worker", "check", "benchmark"])
+@pytest.mark.parametrize("name", ["api", "worker", "ollama", "check", "benchmark"])
 def test_service_launch_uses_private_config_and_loopback(tmp_path, service, monkeypatch, name):
     config.render(tmp_path, tmp_path / "release", "example.invalid", "qwen3:14b")
     monkeypatch.setattr(sys, "argv", ["service", "--root", str(tmp_path), name])
@@ -160,6 +160,7 @@ def test_service_launch_uses_private_config_and_loopback(tmp_path, service, monk
     assert captured["env"]["DATABASE_URL"] == "sqlite:///" + str(tmp_path / "data/cqa.db")
     assert captured["env"]["OLLAMA_HOST"] == "127.0.0.1:11434"
     assert captured["env"]["OLLAMA_MAX_LOADED_MODELS"] == "1"
+    assert captured["env"]["OLLAMA_NO_CLOUD"] == "1"
     assert captured["env"]["AI_AUTO_START_WORKER"] == "false"
     assert "DATASET_API_URL" not in " ".join(captured["command"])
     if name == "api":

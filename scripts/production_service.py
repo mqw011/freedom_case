@@ -84,6 +84,7 @@ def main():
                 "OLLAMA_MODELS": str(root / "models"),
                 "OLLAMA_NUM_PARALLEL": values.get("LLM_MAX_CONCURRENCY", "1"),
                 "OLLAMA_MAX_LOADED_MODELS": "1",
+                "OLLAMA_NO_CLOUD": "1",
                 "OLLAMA_DEBUG": "false",
             }
         )

@@ -48,6 +48,11 @@ unresolved question if no such question was asked. Do not require external sourc
 observable transcript facts or a simple language preference. A short correctly resolved request
 can meet the maximum scale level. Assess the configured rubric, not hypothetical services the
 client never requested.
+Conversational service requests (language, acknowledgement, routing or format) are still actual
+requests unless the checklist explicitly excludes them. Do not assume the client intended an
+unstated financial question. Check the first client turn before accepting 'no request formulated';
+later thanks or goodbye cannot erase an earlier request. A low consultation step must correspond
+to an actual unanswered request or incorrect answer, not an unrelated violation from another item.
 """
     # Keep the original prefix intact so local runtimes can reuse its KV cache.
     # This system message is application-owned, never derived from the transcript.

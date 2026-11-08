@@ -42,6 +42,22 @@ evidence, апелляции и версионирование прошли brow
 [Deployment](docs/runpod-deployment.md), [operations](docs/production-operations.md),
 [контрольный набор и стоп-код](docs/control-dataset-runbook.md).
 
+## Официальная сдача результатов — JSON 1.0
+
+Команда **hustlers**. [Экспорт, валидатор и отправка](docs/results-export.md) формируют
+`results/dev/results.json` (65 диалогов) и `results/prod/results.json`
+(10 настоящих контрольных чатов). Незавершённые оценки сохраняются как error.
+
+После оценки контрольного набора `FBroker`, из корня локального репозитория:
+
+```bash
+uv run --directory backend submit-results --runpod --prod-group-id FBroker --require-prod-complete
+```
+
+Команда берёт свежий read-only snapshot с RunPod, проверяет оба JSON, выполняет commit/push
+и сверяет удалённый SHA. Не перезапускает сайт/worker и не меняет базу.
+Повторный запуск обновляет результаты без дубликатов.
+
 ## Требования для CachyOS
 
 Нужны Git, `uv`, Node.js ≥22.12 и npm. Python 3.12 закреплён в `backend/.python-version`; `uv` может установить его автоматически. Системный Python CachyOS менять не нужно. Для системной установки доступны пакеты CachyOS/Arch `git`, `uv`, `nodejs`, `npm`.

@@ -1,0 +1,4 @@
+[submission]
+team_name = "hustlers"
+# The current deployment runs Ollama locally on its own GPU.
+model_mode = "local"

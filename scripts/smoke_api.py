@@ -7,6 +7,7 @@ import argparse
 import copy
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 import httpx
@@ -14,9 +15,15 @@ import httpx
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run(base_url: str) -> dict:
+def run(base_url: str, *, auth=None, verify=True) -> dict:
+    if auth and urlsplit(base_url).scheme != "https":
+        raise ValueError("Credentials require HTTPS")
     with httpx.Client(
-        base_url=base_url.rstrip("/") + "/", timeout=30, trust_env=False
+        base_url=base_url.rstrip("/") + "/",
+        timeout=30,
+        trust_env=False,
+        auth=auth,
+        verify=verify,
     ) as client:
 
         def request(method, path, **kwargs):
@@ -27,9 +34,7 @@ def run(base_url: str) -> dict:
         assert request("GET", "health")["database"] == "ok"
         source = json.loads((ROOT / "examples/synthetic-dataset.json").read_text())
         source["data"]["dataset_group_id"] = f"LOCAL-SMOKE-{uuid4().hex[:8]}"
-        files = {
-            "file": ("synthetic.json", json.dumps(source).encode(), "application/json")
-        }
+        files = {"file": ("synthetic.json", json.dumps(source).encode(), "application/json")}
         report = request("POST", "datasets/import-json", files=files)
         assert report["inserted"] == 1
         assert request("POST", "datasets/import-json", files=files)["skipped"] == 1
@@ -41,9 +46,7 @@ def run(base_url: str) -> dict:
         assert detail["messages"][0]["timestamp_raw"] == "00:00"
         assert len(request("GET", f"conversations/{conversation_id}/messages")) == 3
         default = next(
-            c
-            for c in request("GET", "checklists")["items"]
-            if c["name"] == "Freedom Broker"
+            c for c in request("GET", "checklists")["items"] if c["name"] == "Freedom Broker"
         )
         versions = request("GET", f"checklists/{default['id']}/versions")
         original = next(v for v in versions if v["version_number"] == 1)
@@ -123,5 +126,12 @@ def run(base_url: str) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/api")
+    parser.add_argument("--credentials-file", type=Path)
     args = parser.parse_args()
-    print(json.dumps(run(args.base_url), indent=2, ensure_ascii=False))
+    auth = None
+    if args.credentials_file:
+        if args.credentials_file.stat().st_mode & 0o077:
+            parser.error("Credentials file must have mode 0600")
+        credentials = json.loads(args.credentials_file.read_text())
+        auth = (credentials["username"], credentials["password"])
+    print(json.dumps(run(args.base_url, auth=auth), indent=2, ensure_ascii=False))

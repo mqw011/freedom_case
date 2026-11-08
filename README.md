@@ -29,6 +29,10 @@ AI worker → AIEvaluator → StructuredEvaluation → тот же сервис 
 
 [Stage 3 и безопасная демонстрация](README_STAGE3.md), [UI workflows](docs/ui-workflows.md), [тестовый отчёт](docs/stage3-test-report.md), [RunPod handoff](docs/runpod-readiness.md). Для браузерных тестов используется отдельная временная SQLite с синтетическими данными; рабочий DEV не изменяется.
 
+## RunPod — Stage 4
+
+[Stage 4](README_STAGE4.md) пока **PARTIAL**: подготовлены и локально проверены защищённый Nginx ingress, Supervisor, backup/restore и production smoke. SSH ожидает разблокировки ключа; реальное развёртывание, GPU inference и внешний HTTPS пока не подтверждены. DEV остаётся локально до подтверждения допустимости передачи. [Deployment](docs/runpod-deployment.md), [operations](docs/production-operations.md), [контрольный набор и стоп-код](docs/control-dataset-runbook.md).
+
 ## Требования для CachyOS
 
 Нужны Git, `uv`, Node.js ≥22.12 и npm. Python 3.12 закреплён в `backend/.python-version`; `uv` может установить его автоматически. Системный Python CachyOS менять не нужно. Для системной установки доступны пакеты CachyOS/Arch `git`, `uv`, `nodejs`, `npm`.

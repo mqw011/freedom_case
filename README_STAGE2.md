@@ -145,3 +145,7 @@ Frontend-клиент готов: `frontend/src/api/ai.js`, DTO описаны �
 ## Фактическая проверка
 
 Окончательные результаты real inference, benchmark, regression и состояния очереди приводятся в [ai-evaluation-quality.md](docs/ai-evaluation-quality.md). Наличие валидного JSON само по себе не означает хорошего качества оценивания.
+
+## Проверка Stage 4 — 2026-11-08
+
+RunPod inference пока не выполнен: SSH Agent ещё не содержит разблокированного ключа. Новые метрики GPU/качества не получены; прежний статус Stage 2 **PARTIAL** сохраняется. Локальные proxy, backup и UI-тесты не заменяют проверку Qwen. См. [Stage 4](README_STAGE4.md).

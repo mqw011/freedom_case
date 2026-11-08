@@ -1,0 +1,66 @@
+# Generated per deployment. Only this authenticated HTTP port may be exposed by RunPod.
+worker_processes 1;
+pid @@ROOT@@/run/nginx.pid;
+error_log @@ROOT@@/logs/nginx-error.log crit;
+events { worker_connections 256; }
+http {
+    include @@MIME_TYPES@@;
+    default_type application/octet-stream;
+    access_log off;
+    server_tokens off;
+    client_body_temp_path @@ROOT@@/run/client_body;
+    proxy_temp_path @@ROOT@@/run/proxy_temp;
+    fastcgi_temp_path @@ROOT@@/run/fastcgi_temp;
+    uwsgi_temp_path @@ROOT@@/run/uwsgi_temp;
+    scgi_temp_path @@ROOT@@/run/scgi_temp;
+    map $http_x_forwarded_proto $cqa_https { default 0; https 1; }
+    map $request_method $cqa_write { default 1; GET 0; HEAD 0; OPTIONS 0; }
+    map $http_origin $cqa_origin_allowed { default 0; "" 1; "https://@@HOST@@" 1; }
+    map "$cqa_write:$cqa_origin_allowed" $cqa_bad_origin { default 0; "1:0" 1; }
+    map "$cqa_write:$http_sec_fetch_site" $cqa_cross_site { default 0; "1:cross-site" 1; }
+    # FastAPI's authenticated documentation uses its standard CDN bundles and inline bootstrap.
+    # The application itself never permits third-party scripts.
+    map $uri $cqa_csp {
+        default "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
+        /docs "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data: https://fastapi.tiangolo.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
+        /redoc "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fastapi.tiangolo.com; connect-src 'self'; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
+    }
+    server {
+        listen @@PORT@@;
+        server_name @@HOST@@;
+        root @@RELEASE@@/frontend/dist;
+        index index.html;
+        client_max_body_size 21m;
+        # RunPod terminates TLS. Never challenge for credentials over a plain HTTP origin.
+        if ($cqa_https = 0) { return 308 https://@@HOST@@$request_uri; }
+        # Browsers cache Basic credentials: reject cross-origin state-changing forms/fetches.
+        if ($cqa_bad_origin = 1) { return 403; }
+        if ($cqa_cross_site = 1) { return 403; }
+        auth_basic "CQA restricted workspace";
+        auth_basic_user_file @@ROOT@@/secrets/access.htpasswd;
+        add_header Cache-Control "no-store" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "no-referrer" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        # Vite uses inline styles for chart values. Scripts remain same-origin only.
+        add_header Content-Security-Policy $cqa_csp always;
+        location /api/ {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_set_header Host @@HOST@@;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header Authorization "";
+            proxy_connect_timeout 5s;
+            proxy_read_timeout 310s;
+            proxy_send_timeout 310s;
+            proxy_buffering off;
+            proxy_cache off;
+        }
+        # Swagger requires CDN scripts. These URLs retain the same mandatory authentication.
+        location = /docs { proxy_pass http://127.0.0.1:8000; proxy_set_header Authorization ""; }
+        location = /openapi.json { proxy_pass http://127.0.0.1:8000; proxy_set_header Authorization ""; }
+        location = /redoc { proxy_pass http://127.0.0.1:8000; proxy_set_header Authorization ""; }
+        location ~ /\. { deny all; }
+        location / { try_files $uri $uri/ /index.html; }
+    }
+}

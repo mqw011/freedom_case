@@ -76,3 +76,7 @@ npm run test:e2e
 Для `test:e2e` порты 8011/4173 должны быть свободны: Playwright сам запускает изолированный backend и Vite, после завершения останавливает их. Worker, Ollama и GPU не запускаются. На CachyOS Playwright использует совместимую сборку Chromium для Linux; запуск проверен с отключённым GPU-рендерингом браузера. Отчёты/скриншоты содержат только синтетические данные и исключены из Git.
 
 Подробнее: [frontend architecture](docs/frontend-architecture.md), [пользовательские сценарии](docs/ui-workflows.md), [отчёт проверок](docs/stage3-test-report.md), [RunPod handoff](docs/runpod-readiness.md).
+
+## Production handoff — 2026-11-08
+
+Production-сборка дополнительно прошла локальный защищённый Nginx/TLS smoke (10 маршрутов, evidence, mobile, Swagger); синтетическая БД изолирована от DEV. Сам RunPod ещё не проверен из-за SSH-блокера. [Stage 4](README_STAGE4.md) остаётся PARTIAL.

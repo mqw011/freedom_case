@@ -51,3 +51,33 @@ def test_insecure_endpoints_rejected(base):
 def test_credentials_not_sent_in_plaintext():
     with pytest.raises(ValueError, match="https"):
         health_module.health("http://localhost:8000", credentials={"username": "x"})
+
+
+def test_health_transport_identifies_itself_to_gateway_and_rejects_wrong_json_shape():
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class Gateway(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.headers.get("User-Agent") != "cqa-production-healthcheck/1":
+                self.send_response(403)
+                self.end_headers()
+                return
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"[]" if self.path == "/wrong" else b'{"database":"ok"}')
+
+        def log_message(self, *args):
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Gateway)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        base = f"http://127.0.0.1:{server.server_port}"
+        assert health_module.fetch(base, "/health") == (200, {"database": "ok"})
+        assert health_module.fetch(base, "/wrong") == (0, {})
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()

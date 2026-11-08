@@ -20,7 +20,7 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 def fetch(base, path, credentials=None):
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "User-Agent": "cqa-production-healthcheck/1"}
     if credentials:
         raw = f"{credentials['username']}:{credentials['password']}".encode()
         headers["Authorization"] = "Basic " + base64.b64encode(raw).decode()
@@ -28,7 +28,8 @@ def fetch(base, path, credentials=None):
         with build_opener(NoRedirect()).open(
             Request(base + path, headers=headers), timeout=15
         ) as r:
-            return r.status, json.loads(r.read(2 * 1024 * 1024))
+            payload = json.loads(r.read(2 * 1024 * 1024))
+            return (r.status, payload) if isinstance(payload, dict) else (0, {})
     except HTTPError as error:
         return error.code, {}
     except (URLError, TimeoutError, ValueError, OSError, ssl.SSLError):

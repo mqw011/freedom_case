@@ -10,6 +10,8 @@ from pathlib import Path
 from app.ai.benchmark.cases import CASES, make_context
 from app.ai.evaluator import LLMEvaluator
 from app.ai.exceptions import AIError
+from app.ai.jobs import PINNED_SETTINGS
+from app.ai.prompt_engine import PROMPT_VERSION
 from app.ai.providers import make_provider
 from app.core.config import Settings
 from app.services.scoring_engine import score
@@ -17,6 +19,17 @@ from app.services.scoring_engine import score
 
 def ratio(numerator, denominator):
     return round(numerator / denominator, 4) if denominator else None
+
+
+def configuration(settings):
+    """Public reproducibility metadata; never serialize the complete Settings object."""
+    return {
+        "model": settings.llm_model,
+        "provider": settings.llm_provider,
+        "context_length": settings.llm_context_length,
+        "prompt_version": PROMPT_VERSION,
+        "inference_settings": {key: getattr(settings, key) for key in PINNED_SETTINGS},
+    }
 
 
 def summarize(rows):
@@ -98,17 +111,17 @@ async def run(args):
                 fp=int(actual["08"] == "yes" and expected["08"] == "no"),
                 fn=int(actual["08"] == "no" and expected["08"] == "yes"),
                 disagreements=[c for c, v in expected.items() if actual[c] != v],
+                # These answers concern only the public synthetic cases in this module.
+                answers=actual,
             )
         except AIError as exc:
-            row.update(status="failed", error_code=exc.code)
+            row.update(status="failed", error_code=exc.code, rejected_criteria=list(exc.criteria))
         row.update(
             latency_seconds=round(time.monotonic() - start, 2), metrics=asdict(evaluator.metrics)
         )
         rows.append(row)
         report = {
-            "model": settings.llm_model,
-            "provider": settings.llm_provider,
-            "context_length": settings.llm_context_length,
+            **configuration(settings),
             "summary": summarize(rows),
             "cases": rows,
         }

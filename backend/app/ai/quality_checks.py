@@ -38,6 +38,11 @@ the transcript or proposed explanation. If external financial correctness cannot
 mark needs_human_review=true and issue=external_fact_unverified. Such uncertainty may be supported
 ONLY if the proposed explanation explicitly acknowledges it; otherwise supported=false.
 Return exactly one decision per proposed criterion. Use supported=false for substantive conflicts.
+Independently identify the client's actual requests and their answers. Reject a claim of an
+unresolved question if no such question was asked. Do not require external sources for directly
+observable transcript facts or a simple language preference. A short correctly resolved request
+can meet the maximum scale level. Assess the configured rubric, not hypothetical services the
+client never requested.
 """
     # Keep the original prefix intact so local runtimes can reuse its KV cache.
     # This system message is application-owned, never derived from the transcript.

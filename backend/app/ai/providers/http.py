@@ -41,7 +41,8 @@ def transport_schema(value):
         return {
             key: transport_schema(item)
             for key, item in value.items()
-            if key not in {"title", "default", "maxLength", "minLength"}
+            if key not in {"title", "default", "maxLength"}
+            and not (key == "minLength" and item > 1)
             and not (key == "maxItems" and item > 20)
         }
     return value

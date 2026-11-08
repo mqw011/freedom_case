@@ -24,6 +24,18 @@ def test_benchmark_metadata_reproduces_settings_without_secrets():
     assert "llm_base_url" not in public["inference_settings"]
 
 
+@pytest.mark.parametrize("failed,expected", [(0, 0), (1, 1)])
+def test_benchmark_cli_fails_when_inference_fails(monkeypatch, failed, expected):
+    import app.ai.benchmark.__main__ as benchmark
+
+    async def finished(_):
+        return {"sample_size": 1, "failed": failed}
+
+    monkeypatch.setattr("sys.argv", ["benchmark", "--case", "ru_good"])
+    monkeypatch.setattr(benchmark, "run", finished)
+    assert benchmark.main() == expected
+
+
 @pytest.mark.parametrize("case", CASES, ids=[c[0] for c in CASES])
 def test_reference_case_is_complete_and_valid(case):
     name, language, messages, expected = case

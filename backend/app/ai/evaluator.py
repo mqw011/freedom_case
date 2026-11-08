@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from app.ai.exceptions import AIError, GroundingError, OutputError
 from app.ai.grounding import validate_chunk, validate_grounding
 from app.ai.output_parser import parse_evaluation
-from app.ai.prompt_engine import ChunkReview, PromptEngine
+from app.ai.prompt_engine import ChunkReview, PromptEngine, evidence_schema
 from app.ai.providers.base import InferenceMetrics, LLMProvider
 from app.ai.quality_checks import SemanticReview, repair_feedback, review_prompt, validate_semantic
 from app.core.config import Settings
@@ -51,7 +51,9 @@ class LLMEvaluator:
             )
             try:
                 self.metrics.assessment_requests += 1
-                data = await self._generate(messages, self.prompts.output_schema(context, codes))
+                data = await self._generate(
+                    messages, self.prompts.output_schema(context, codes, messages=transcript)
+                )
                 output = parse_evaluation(data)
                 self.metrics.schema_valid += 1
                 actual = [r.criterion_code for r in output.results]
@@ -108,6 +110,7 @@ short; select the strongest evidence, never discard a possible gross violation.
 """
             try:
                 schema = ChunkReview.model_json_schema()
+                schema["$defs"]["EvidenceInput"] = evidence_schema(window)
                 schema["properties"]["covered_message_ids"].update(
                     minItems=len(window),
                     maxItems=len(window),

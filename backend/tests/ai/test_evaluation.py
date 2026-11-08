@@ -8,7 +8,7 @@ from app.ai.evaluator import LLMEvaluator
 from app.ai.exceptions import AIError
 from app.ai.grounding import validate_grounding
 from app.ai.output_parser import parse_evaluation
-from app.ai.prompt_engine import PromptEngine
+from app.ai.prompt_engine import PromptEngine, evidence_schema, quote_candidates
 from app.services.ai_contract import StructuredEvaluation
 from tests.ai.conftest import FakeProvider, grounded_result
 
@@ -55,6 +55,32 @@ def test_new_criterion_and_scale_in_prompt_and_schema(context, ai_settings):
     data = json.loads(engine.build(context)[1]["content"])
     assert data["trusted_checklist"][-1]["allowed_answers"] == ["0", "3", "6", "na"]
     assert engine.output_schema(context)["properties"]["results"]["minItems"] == 9
+
+
+def test_decoding_evidence_is_bound_to_visible_message_and_exact_text(context, ai_settings):
+    window = context.conversation.messages[:2]
+    schema = PromptEngine(ai_settings).output_schema(context, messages=window)
+    variants = schema["$defs"]["EvidenceInput"]["oneOf"]
+    sources = {m.id: m.text for m in window}
+    quotes = [v for v in variants if v["properties"]["evidence_type"]["const"] == "quote"]
+    assert {v["properties"]["message_id"]["const"] for v in quotes} == set(sources)
+    for variant in quotes:
+        text = sources[variant["properties"]["message_id"]["const"]]
+        assert all(span in text for span in variant["properties"]["excerpt"]["enum"])
+    for variant in variants[-2:]:
+        assert set(variant["properties"]["message_id"]["enum"]) == set(sources)
+        assert "end_message_id" in variant["required"]
+        assert variant["properties"]["excerpt"] == {"type": "null"}
+    assert evidence_schema(window) == schema["$defs"]["EvidenceInput"]
+
+
+def test_long_multilingual_quote_alternatives_do_not_translate_or_drop_tail():
+    text = "Начало. " + "English Қазақша Русский " * 200 + " Уникальный конец."
+    candidates = quote_candidates(text)
+    assert len(candidates) > 1
+    assert all(value in text and len(value) <= 1024 for value in candidates)
+    assert any(value.startswith("Начало.") for value in candidates)
+    assert any(value.endswith("Уникальный конец.") for value in candidates)
 
 
 @pytest.mark.anyio

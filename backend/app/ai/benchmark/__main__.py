@@ -137,6 +137,7 @@ async def run(args):
             flush=True,
         )
     print(json.dumps(summarize(rows), ensure_ascii=False, indent=2))
+    return summarize(rows)
 
 
 def main():
@@ -145,8 +146,9 @@ def main():
     )
     parser.add_argument("--case", action="append", choices=[c[0] for c in CASES])
     parser.add_argument("--output", type=Path, default=Path("data/ai-verification/benchmark.json"))
-    asyncio.run(run(parser.parse_args()))
+    summary = asyncio.run(run(parser.parse_args()))
+    return 0 if summary["sample_size"] > 0 and summary["failed"] == 0 else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

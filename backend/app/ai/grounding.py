@@ -60,15 +60,30 @@ def validate_grounding(
         raise GroundingError("invalid_answers") from None
     for result in output.results:
         if not result.evidence:
-            raise GroundingError("invalid_evidence", criteria=(result.criterion_code,))
+            raise GroundingError(
+                "invalid_evidence",
+                criteria=(result.criterion_code,),
+                hint="Every result needs at least one evidence item with real message IDs.",
+            )
         if result.answer == "yes" and not any(e.evidence_type == "quote" for e in result.evidence):
-            raise GroundingError("invalid_evidence", criteria=(result.criterion_code,))
+            raise GroundingError(
+                "invalid_evidence",
+                criteria=(result.criterion_code,),
+                hint=(
+                    "A yes answer requires at least one evidence_type=quote with an EXACT "
+                    "source excerpt and end_message_id=null. A range alone is insufficient."
+                ),
+            )
         if (
             isinstance(result.answer, Decimal)
             and result.answer > 0
             and not any(e.evidence_type in {"quote", "range"} for e in result.evidence)
         ):
-            raise GroundingError("invalid_evidence", criteria=(result.criterion_code,))
+            raise GroundingError(
+                "invalid_evidence",
+                criteria=(result.criterion_code,),
+                hint="A positive scale answer requires a quote or range, not only absence.",
+            )
         for evidence in result.evidence:
             try:
                 validate_evidence(context, evidence, covered_ids)

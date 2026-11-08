@@ -8,6 +8,7 @@ import os
 import shutil
 import ssl
 import sys
+import tempfile
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -17,6 +18,26 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
+
+
+def disk_health(path):
+    """Shared FUSE free space does not reveal the tenant quota; verify a small write too."""
+    usage = shutil.disk_usage(path)
+    writable = False
+    try:
+        with tempfile.TemporaryFile(prefix=".cqa-health-", dir=path) as probe:
+            probe.write(b"\0" * 1024 * 1024)
+            probe.flush()
+            os.fsync(probe.fileno())
+        writable = True
+    except OSError:
+        writable = False  # Report failure without leaking filesystem details.
+    return {
+        "disk_free_bytes": usage.free,
+        "disk_free_scope": "filesystem; tenant quota may be smaller",
+        "disk_write_probe_ok": writable,
+        "disk_ok": writable and usage.free >= 1024**3,
+    }
 
 
 def fetch(base, path, credentials=None):
@@ -60,9 +81,7 @@ def health(base, *, credentials=None, require_ai=False, disk=None):
         counts[state] = page.get("total") if status == 200 else None
     result["jobs"] = counts
     if disk:
-        usage = shutil.disk_usage(disk)
-        result["disk_free_bytes"] = usage.free
-        result["disk_ok"] = usage.free >= 1024**3
+        result.update(disk_health(disk))
     if credentials:
         # Verify all sensitive routes fail closed without auth, not just the UI.
         protected = {}

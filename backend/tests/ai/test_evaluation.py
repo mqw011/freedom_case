@@ -153,6 +153,21 @@ def test_partial_coverage_is_not_success(context):
         )
 
 
+def test_positive_answer_range_is_rejected_with_actionable_repair(context):
+    data = grounded_result(context)
+    item = data["results"][0]
+    item["answer"] = "yes"
+    item["evidence"] = copy.deepcopy(data["results"][-1]["evidence"])
+    with pytest.raises(AIError) as error:
+        validate_grounding(
+            context, parse_evaluation(data), {m.id for m in context.conversation.messages}
+        )
+    assert error.value.code == "invalid_evidence"
+    assert error.value.criteria == (item["criterion_code"],)
+    assert "evidence_type=quote" in error.value.hint
+    assert "end_message_id=null" in error.value.hint
+
+
 @pytest.mark.anyio
 async def test_semantic_contradiction_fails_after_bounded_repairs(context, ai_settings):
     evaluator = LLMEvaluator(

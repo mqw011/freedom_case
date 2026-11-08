@@ -1,3 +1,4 @@
+import errno
 import importlib.util
 from pathlib import Path
 
@@ -8,6 +9,24 @@ spec = importlib.util.spec_from_file_location(
 )
 health_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(health_module)
+
+
+def test_disk_probe_cleans_up_and_reports_actual_writability(tmp_path):
+    report = health_module.disk_health(tmp_path)
+    assert report["disk_write_probe_ok"]
+    assert list(tmp_path.iterdir()) == []
+    assert "quota" in report["disk_free_scope"]
+
+
+@pytest.mark.parametrize("code", [errno.EDQUOT, errno.ENOSPC, errno.EROFS])
+def test_disk_probe_detects_quota_despite_shared_free_space(monkeypatch, tmp_path, code):
+    def fail(**kwargs):
+        raise OSError(code, "unwritable")
+
+    monkeypatch.setattr(health_module.tempfile, "TemporaryFile", fail)
+    report = health_module.disk_health(tmp_path)
+    assert not report["disk_write_probe_ok"]
+    assert not report["disk_ok"]
 
 
 def test_offline_ai_separate_from_backend_and_queue(monkeypatch):

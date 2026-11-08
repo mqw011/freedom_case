@@ -1,0 +1,175 @@
+{
+  "model": "qwen3:30b-a3b-instruct-2507-q4_K_M",
+  "provider": "ollama",
+  "context_length": 32768,
+  "prompt_version": "cqa-2.6",
+  "inference_settings": {
+    "llm_temperature": 0.7,
+    "llm_timeout": 300.0,
+    "llm_max_retries": 2,
+    "llm_retry_delay": 1.0,
+    "llm_context_length": 32768,
+    "llm_max_output_tokens": 8192,
+    "llm_response_mode": "auto",
+    "llm_think": false,
+    "llm_seed": 42,
+    "ai_max_repairs": 2,
+    "ai_chunk_overlap": 2,
+    "ai_max_chunks": 64,
+    "ai_explanation_language": "conversation",
+    "ai_semantic_review": true
+  },
+  "summary": {
+    "sample_size": 3,
+    "completed": 1,
+    "failed": 2,
+    "valid_json_rate": 0.8333,
+    "schema_validation_rate": 1.0,
+    "criterion_completion_rate": 1.0,
+    "evidence_validity_rate": 0.5,
+    "criterion_agreement": 0.625,
+    "na_agreement": 0.5,
+    "score_mae": 50.0,
+    "critical_precision": null,
+    "critical_recall": null,
+    "mean_latency_seconds": 104.12,
+    "failures_by_language": {
+      "KZ": 1,
+      "EN": 1
+    },
+    "by_language": {
+      "RU": {
+        "cases": 1,
+        "completed": 1,
+        "criterion_agreement": 0.625
+      },
+      "KZ": {
+        "cases": 1,
+        "completed": 0,
+        "criterion_agreement": null
+      },
+      "EN": {
+        "cases": 1,
+        "completed": 0,
+        "criterion_agreement": null
+      }
+    }
+  },
+  "cases": [
+    {
+      "case": "ru_good",
+      "language": "RU",
+      "status": "completed",
+      "matches": 5,
+      "na_matches": 2,
+      "score_error": 50.0,
+      "score": "50.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "disagreements": [
+        "02",
+        "04",
+        "05"
+      ],
+      "answers": {
+        "01": "yes",
+        "02": "no",
+        "03": "na",
+        "04": "na",
+        "05": "no",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "latency_seconds": 65.57,
+      "metrics": {
+        "requests": 5,
+        "successful_json": 5,
+        "assessment_requests": 3,
+        "schema_valid": 3,
+        "complete_results": 3,
+        "grounded_results": 2,
+        "repairs": 2,
+        "chunk_count": 1,
+        "input_tokens": 17140,
+        "output_tokens": 6425,
+        "latency_ms": 65567,
+        "errors": [
+          "invalid_evidence",
+          "semantic_conflict"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ]
+      }
+    },
+    {
+      "case": "kz_good",
+      "language": "KZ",
+      "status": "failed",
+      "error_code": "truncated_output",
+      "rejected_criteria": [],
+      "latency_seconds": 132.8,
+      "metrics": {
+        "requests": 3,
+        "successful_json": 2,
+        "assessment_requests": 2,
+        "schema_valid": 2,
+        "complete_results": 2,
+        "grounded_results": 1,
+        "repairs": 1,
+        "chunk_count": 1,
+        "input_tokens": 5148,
+        "output_tokens": 2720,
+        "latency_ms": 43805,
+        "errors": [
+          "invalid_evidence",
+          "truncated_output"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ]
+      }
+    },
+    {
+      "case": "en_good",
+      "language": "EN",
+      "status": "failed",
+      "error_code": "truncated_output",
+      "rejected_criteria": [],
+      "latency_seconds": 113.99,
+      "metrics": {
+        "requests": 4,
+        "successful_json": 3,
+        "assessment_requests": 3,
+        "schema_valid": 3,
+        "complete_results": 3,
+        "grounded_results": 1,
+        "repairs": 2,
+        "chunk_count": 1,
+        "input_tokens": 7450,
+        "output_tokens": 2648,
+        "latency_ms": 27290,
+        "errors": [
+          "invalid_evidence",
+          "invalid_evidence",
+          "truncated_output"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ]
+      }
+    }
+  ],
+  "code_sha": "cdcda0871f3c1ca233dc4d2c3f20218159e36d1c",
+  "selected_for_production": false,
+  "expected_cases": 9,
+  "stop_reason": "Stopped after RU/KZ/EN preflight: two truncated outputs and incorrect completed RU assessment. Remaining six were not run.",
+  "model_digest": "19e422b0231392335cfc49cfd172de7034bb1aeabb08aa307cce745c60b272fe",
+  "storage": "temporary model cache only; no DEV database copied",
+  "measurement_note": "One bounded synthetic schema diagnostic shared the GPU during early cases. Not an isolated throughput benchmark."
+}

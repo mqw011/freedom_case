@@ -1,6 +1,13 @@
 # Stage 2 — AI Evaluation Engine
 
-**Статус: PARTIAL.** Backend, очередь и автоматические проверки реализованы. Обязательная проверка качества и успешный real inference на всех целевых типах диалогов пока не завершены: локальная GPU отказала (NVIDIA Xid 79), полноценный запрос на CPU превысил 600 секунд. Тег `stage-2-ai-complete` не создан.
+**Статус: PARTIAL по приёмке качества; инженерный pipeline работает.**
+Локальный NVIDIA Xid79 обойдён переносом на RunPod RTX4090. Настоящие RU/KZ/EN,
+long115 и voice прошли worker → validators → SQLite → API. Полный9-case benchmark
+в выбранной конфигурации:9 completed, agreement88.89%, critical recall0.5 на двух
+положительных кейсах. Это измеренный остаточный риск, а не доказанная безошибочность.
+Нужна независимая проверка разметки и качества, особенно идентификации/конфиденциальности.
+Тег `stage-2-ai-complete` пока не создан. Точные результаты:
+[Stage4](README_STAGE4.md), [quality report](docs/ai-evaluation-quality.md).
 
 Реализован путь **Conversation → Qwen3/Ollama → StructuredEvaluation → grounding + semantic audit → EvaluationService → Scoring Engine → SQLite → REST API**. Полноценный React UI — Stage 3, RunPod deployment — Stage 4.
 
@@ -148,4 +155,8 @@ Frontend-клиент готов: `frontend/src/api/ai.js`, DTO описаны �
 
 ## Проверка Stage 4 — 2026-11-08
 
-RunPod inference пока не выполнен: SSH Agent ещё не содержит разблокированного ключа. Новые метрики GPU/качества не получены; прежний статус Stage 2 **PARTIAL** сохраняется. Локальные proxy, backup и UI-тесты не заменяют проверку Qwen. См. [Stage 4](README_STAGE4.md).
+SSH, GPU, provider и worker доступны. Пять DEV-сценариев и изменённый synthetic
+checklist сохранены настоящими AI Evaluations и повторно проверены через защищённый
+HTTPS. Full DEV batch поставлен в durable queue и продолжается; его live progress
+смотреть в **AI задания → Пакеты → #4**. Старые данные не удалены. Scoring Engine
+не менялся. Автозапуск контейнера отложен владельцем отдельно от работающих сервисов.

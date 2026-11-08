@@ -19,7 +19,9 @@ frontend → Fetch API → /api
 AI worker → AIEvaluator → StructuredEvaluation → тот же сервис оценки
 ```
 
-**Проверка Stage 2 пока PARTIAL:** аппаратный отказ GPU и timeout CPU не позволили завершить обязательные real inference проверки. Подробности — в [отчёте Stage 2](README_STAGE2.md).
+Локальный GPU-сбой Stage 2 обойдён переносом на RunPod: настоящие RU/KZ/EN, длинный
+разговор и звонок уже прошли полный pipeline. Измеренное качество, пакетная обработка
+и текущая приёмка — в [Stage 4](README_STAGE4.md) и [отчёте AI](docs/ai-evaluation-quality.md).
 
 Подробности: [архитектура](docs/architecture.md), [API](docs/api.md), [расчёт](docs/scoring.md), [roadmap](docs/roadmap.md), [отчёт Stage 1](README_STAGE1.md), [запуск Stage 2](README_STAGE2.md), [AI engine](docs/ai-engine.md), [AI jobs](docs/ai-jobs.md).
 
@@ -31,7 +33,14 @@ AI worker → AIEvaluator → StructuredEvaluation → тот же сервис 
 
 ## RunPod — Stage 4
 
-[Stage 4](README_STAGE4.md) пока **PARTIAL**: подготовлены и локально проверены защищённый Nginx ingress, Supervisor, backup/restore и production smoke. SSH ожидает разблокировки ключа; реальное развёртывание, GPU inference и внешний HTTPS пока не подтверждены. DEV остаётся локально до подтверждения допустимости передачи. [Deployment](docs/runpod-deployment.md), [operations](docs/production-operations.md), [контрольный набор и стоп-код](docs/control-dataset-runbook.md).
+[Stage 4](README_STAGE4.md): приложение развёрнуто на существующем RunPod RTX 4090,
+защищённый HTTPS — https://f05y0qgekhw7ag-8080.proxy.runpod.net. DEV перенесён с
+разрешения владельца на network volume и проверен без потерь. Production UI, импорт,
+evidence, апелляции и версионирование прошли browser/API smoke. Qwen3 14B работает
+на GPU; фактические AI-метрики и незавершённые пункты приведены в отчёте Stage 4.
+Автозапуск после полного restart Pod отложен владельцем.
+[Deployment](docs/runpod-deployment.md), [operations](docs/production-operations.md),
+[контрольный набор и стоп-код](docs/control-dataset-runbook.md).
 
 ## Требования для CachyOS
 

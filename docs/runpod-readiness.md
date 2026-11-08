@@ -1,4 +1,11 @@
-# Stage 4 handoff — RunPod integration testing
+# Stage 3 → Stage 4: исторический handoff
+
+Этот документ описывает состояние при сдаче Stage 3. Фактическое развёртывание,
+защита HTTPS, persistent mount и AI-проверки теперь описаны в
+[RunPod deployment](runpod-deployment.md) и [Stage 4](../README_STAGE4.md).
+На действующем Pod API использует **127.0.0.1:18000**, SQLite — DELETE journal
+на network volume; приведённые ниже первоначальные предложения не заменяют
+проверенную production-конфигурацию.
 
 Stage 3 не создаёт облачные ресурсы и не настраивает публичный сервер. Готовы React static build, FastAPI API, durable SQLite jobs, отдельный worker, импорт, версии чек-листа, evidence, апелляции и polling. Stage 2 остаётся PARTIAL.
 
@@ -40,7 +47,7 @@ SQLite и sidecar WAL/SHM должны находиться на одном pers
 
 Reverse proxy должен обеспечивать HTTPS, same-origin `/api` → localhost:8000, static frontend, upload limit не меньше настроенного backend, разумный timeout импорта. AI job endpoints асинхронные, долгий inference не требует длинного пользовательского HTTP-соединения. Не кешировать приватные API-ответы. Не логировать тела, Authorization, подписанные URL, транскрипты. Логи proxy для API лучше ограничить безопасными шаблонами маршрутов.
 
-В приложении нет авторизации по условиям хакатона. До публичного доступа нужны инфраструктурные ограничения (VPN/allowlist или аутентифицирующий proxy), защита Swagger, CORS и CSP под выбранную схему. CORS сам по себе не является авторизацией. Настройки proxy, сертификаты, контейнеры и процесс-supervision предстоит реализовать и проверить в Stage 4.
+В приложении нет авторизации по условиям хакатона. До публичного доступа нужны инфраструктурные ограничения (VPN/allowlist или аутентифицирующий proxy), защита Swagger, CORS и CSP под выбранную схему. CORS сам по себе не является авторизацией. Этот абзац описывает исторический handoff Stage3. В Stage4 защищённый HTTPS proxy и Supervisor уже проверены; текущие настройки и ограничения — в README_STAGE4.md.
 
 ## Health и приёмка
 

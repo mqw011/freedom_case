@@ -1,4 +1,4 @@
-# Архитектура Stage 1
+# Архитектура CQA
 
 ## Границы компонентов
 
@@ -8,7 +8,7 @@
 - `ChecklistService`: создание чек-листа, полные снимки версий, проверка суммы весов при активации/оценке.
 - `ScoringEngine`: чистая функция над конфигурацией/ответами, без HTTP, БД, LLM и специальных правил по коду критерия.
 - `EvidenceValidator`: принадлежность сообщений диалогу, порядок диапазона, наличие точной цитаты.
-- `EvaluationService`: единый конвейер проверки/расчёта/сохранения manual, test и будущих ai результатов. HTTP endpoint пока разрешает только manual/test.
+- `EvaluationService`: единый конвейер проверки/расчёта/сохранения manual, test и ai результатов. Публичный endpoint структурированной оценки разрешает только manual/test; AI сохраняется внутренним orchestrator.
 - `AppealService`: одна открытая апелляция на результат критерия, неизменяемое решение, пересчёт текущего состояния по цепочке решений.
 
 ```mermaid
@@ -66,3 +66,16 @@ FK, уникальность, JSON и сервисы используют SQLAlc
 React/HashRouter → предметные Fetch API clients → TanStack Query → страницы и UI components. Backend endpoints и Scoring Engine сохранены. Все агрегаты строятся по полным пагинированным метаданным; полный транскрипт загружается отдельно. Версия для отображения/апелляции определяется evaluation snapshot, а не текущей активной конфигурацией.
 
 Полная структура: [frontend architecture](frontend-architecture.md). Browser integration тестирует реальные FastAPI endpoints на отдельной временной SQLite через `backend/devtools/ui_server.py`; production API не имеет тестовых маршрутов. GPU/worker для этих проверок не нужны. [Stage 4 handoff](runpod-readiness.md).
+
+
+## Stage 4 deployment
+
+React build и same-origin API опубликованы через защищённый HTTPS ingress RunPod.
+Nginx применяет Basic Auth ко всем UI/API/docs маршрутам; FastAPI слушает только
+127.0.0.1:18000, Ollama — 127.0.0.1:11434. Worker отделён от API; Supervisor
+восстанавливает дочерние процессы. Проверены настоящие GPU evaluations и crash recovery.
+
+SQLite DELETE journal, snapshots и model files расположены на network volume /workspace/cqa.
+Private runtime secrets находятся в /run/cqa, на volume хранится authenticated encrypted vault.
+Автозапуск после полного restart Pod отложен владельцем. Подробные границы и фактическая
+приёмка: [production architecture](production-architecture.md), [Stage 4](../README_STAGE4.md).

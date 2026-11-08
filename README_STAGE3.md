@@ -2,7 +2,7 @@
 
 **Статус: COMPLETE.** Проверки: 249 backend + 65 frontend + 16 e2e; подробности в отчёте ниже.
 
-Stage 3 предоставляет рабочий браузерный интерфейс поверх API Stage 1/2. Статус Stage 2 остаётся **PARTIAL**: после NVIDIA Xid 79 ещё не завершена серия настоящих inference-проверок RU/KZ/EN, длинного разговора и звонка. UI не требует доступной GPU; очереди сохраняются, исторические оценки доступны, успешные результаты не имитируются.
+Stage 3 предоставляет рабочий браузерный интерфейс поверх API Stage 1/2. На момент сдачи Stage 3 статус Stage 2 был **PARTIAL** из-за NVIDIA Xid 79. Эти пять inference-сценариев впоследствии пройдены на RunPod; текущая приёмка и качество описаны в [Stage 4](README_STAGE4.md). UI не требует доступной GPU; очереди сохраняются, исторические оценки доступны, успешные результаты не имитируются.
 
 ## Запуск с существующими данными
 
@@ -79,4 +79,9 @@ npm run test:e2e
 
 ## Production handoff — 2026-11-08
 
-Production-сборка дополнительно прошла локальный защищённый Nginx/TLS smoke (10 маршрутов, evidence, mobile, Swagger); синтетическая БД изолирована от DEV. Сам RunPod ещё не проверен из-за SSH-блокера. [Stage 4](README_STAGE4.md) остаётся PARTIAL.
+Production-сборка дополнительно прошла локальный защищённый Nginx/TLS smoke
+(10 маршрутов, evidence, mobile, Swagger) и настоящий RunPod HTTPS browser smoke:
+9 маршрутов, evidence, reviewer decision, immutable checklist update, pinned job,
+JSON import/reimport и batch, 1440/1280/768/390 px, 0 page errors. Записи smoke
+явно синтетические и отделены от DEV. Фактическое состояние AI и инфраструктуры:
+[Stage 4](README_STAGE4.md).

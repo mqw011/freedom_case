@@ -164,3 +164,18 @@ AI job/batch API, статусы, polling, retry/cancel, health и frontend DTO 
 - Import JSON — multipart поле `file`, не JSON body. Group import принимает только group_id, URL остаётся backend-конфигурацией.
 
 Ключи polling/caching и безопасная обработка ошибок: [frontend architecture](frontend-architecture.md). Примеры браузерных действий и пять минут защиты: [UI workflows](ui-workflows.md).
+
+
+## Защищённый RunPod entry point
+
+Production origin: `https://f05y0qgekhw7ag-8080.proxy.runpod.net`.
+Контракты и пути `/api` не изменены. Basic Auth выполняет reverse proxy до FastAPI;
+защита распространяется также на `/docs`, `/redoc`, `/openapi.json` и import endpoints.
+Неавторизованный запрос возвращает401 от proxy (он может быть HTML, не JSON error envelope).
+Браузер запрашивает вход до загрузки UI. Не передавать пароль в query string или VITE_*.
+
+`GET /api/health` проверяет API/БД, `GET /api/ai/health` отдельно показывает provider,
+worker heartbeat/concurrency и реальные статусы очереди. Длительный inference выполняется
+worker после202, фронтенд опрашивает job/batch; HTTP-соединение до окончания GPU работы
+не удерживается. Порт FastAPI18000 и Ollama11434 наружу не публикуются.
+[Диагностика](production-operations.md), [приёмка и ограничения](../README_STAGE4.md).

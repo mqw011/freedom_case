@@ -1,0 +1,65 @@
+{
+  "captured_at": "2026-11-08T04:44:45.390627+00:00",
+  "dev_conversations": 65,
+  "dev_messages": 1268,
+  "jobs": {
+    "cancelled": 13,
+    "completed": 32,
+    "failed": 2,
+    "queued": 57,
+    "running": 2
+  },
+  "batch4": {
+    "completed": 6,
+    "queued": 57,
+    "running": 2
+  },
+  "tables": {
+    "ai_batches": 4,
+    "ai_job_attempts": 48,
+    "ai_jobs": 106,
+    "ai_worker_lease": 1,
+    "alembic_version": 1,
+    "appeal_decisions": 5,
+    "appeals": 5,
+    "checklist_versions": 7,
+    "checklists": 3,
+    "conversations": 79,
+    "criteria": 56,
+    "criterion_results": 272,
+    "datasets": 6,
+    "evaluations": 34,
+    "evidence": 268,
+    "messages": 1327
+  },
+  "backup": "cqa-20261108T044445147310Z-eed59c86.sqlite3",
+  "dev_evaluated_conversations": 11,
+  "dev_latest_final_average": 83.64,
+  "dev_ai_evaluations": 12,
+  "dev_batch_measurements": {
+    "n": 6,
+    "mean_seconds": 99.48,
+    "median_seconds": 98.89,
+    "provider_calls": 12,
+    "repairs": 0,
+    "input_tokens": 43826,
+    "output_tokens": 18359,
+    "warning": "completed attempts only; pending/failed and intentional worker pause excluded, not whole-batch throughput"
+  },
+  "note": "Snapshot while DEV batch continues. Includes explicitly synthetic UI/benchmark datasets; DEV is counted separately.",
+  "tests": {
+    "backend": 297,
+    "frontend": 65,
+    "e2e": 16,
+    "failed": 0,
+    "ruff": "passed",
+    "eslint": "passed",
+    "build": "passed",
+    "alembic": "passed"
+  },
+  "model": "qwen3:14b",
+  "prompt_version": "cqa-2.4",
+  "code_sha": "a97891ae5de9190c3ca9526573fe1e59686c242c",
+  "autostart": "Pod lifecycle deferred by owner; supervised children running",
+  "quality_status": "independent expert acceptance outstanding; known semantic disagreements"
+}

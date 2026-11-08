@@ -8,7 +8,10 @@
 
 Реализованы Ollama и OpenAI-compatible transport, динамические prompts, строгие DTO, grounding, semantic audit, контекстные окна, durable jobs/batches/attempts, lease recovery и CLI. Используется существующий EvaluationService и неизменённый Scoring Engine. См. [инженерный отчёт](../README_STAGE2.md), [качество и ограничения](ai-evaluation-quality.md).
 
-Аппаратный блокер: NVIDIA Xid 79, CPU слишком медленный; обязательная серия real inference ещё не завершена. Stage 3 не меняет этот статус.
+Локальный блокер NVIDIA Xid79 обойдён переносом на RunPod RTX4090. Пять обязательных
+DEV-сценариев RU/KZ/EN/long/voice прошли весь pipeline, выполнен синтетический benchmark.
+Текущие показатели качества и окончательная приёмка — в Stage4, без заявления
+безошибочности на основании одного лишь JSON.
 
 Следующее улучшение качества — независимая экспертная разметка реальных обезличенных примеров, более мощная модель при достаточных ресурсах и сравнение по языкам; смена модели не требует переписывать scoring.
 
@@ -20,6 +23,12 @@ HashRouter и относительные ассеты сохраняют воз�
 
 ## Stage 4 — эксплуатация
 
-Docker, RunPod GPU, HTTPS, конфигурация домена/CORS, persistent volume для БД, резервное копирование и восстановление, контролируемое применение миграций до запуска. Проверить реальный DEV и контрольный наборы, нагрузку импорта/оценки, длинные звонки и модели. Повторить существующие end-to-end UI-проверки за HTTPS proxy и завершить настоящие GPU inference проверки Stage 2.
+На существующем Pod работают production frontend, FastAPI, Qwen3 14B/Ollama, worker,
+Nginx/HTTPS/Basic Auth, Supervisor, persistent volume и backup/restore. Docker-in-Docker
+не требуется. Проверены живой browser workflow, DEV import/reimport, пять DEV inference
+сценариев, synthetic benchmark и recovery. Полный DEV batch запущен; фактический прогресс
+и ограничения — [Stage4](../README_STAGE4.md). Автозапуск после restart Pod отложен владельцем.
+Контрольный group_id ещё не выдан: механизм импорта и обработки отрепетирован на synthetic
+наборе, [runbook](control-dataset-runbook.md) описывает операции без изменения кода.
 
 При необходимости PostgreSQL: драйвер и DATABASE_URL, проверка миграций и конкурентности. SQLAlchemy-сервисы и Scoring Engine сохраняют интерфейсы. Реальные клиентские данные, записи и секреты не входят в образы и Git.

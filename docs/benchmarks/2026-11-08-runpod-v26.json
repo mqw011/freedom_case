@@ -1,0 +1,633 @@
+{
+  "provider": "ollama",
+  "model": "qwen3:14b",
+  "prompt_version": "cqa-2.6",
+  "context_length": 32768,
+  "thinking": true,
+  "temperature": 0.6,
+  "max_output_tokens": 8192,
+  "max_repairs": 2,
+  "concurrency": 2,
+  "expected_cases": 9,
+  "run_complete": true,
+  "summary": {
+    "sample_size": 9,
+    "completed": 8,
+    "failed": 1,
+    "valid_json_rate": 1.0,
+    "schema_validation_rate": 1.0,
+    "criterion_completion_rate": 1.0,
+    "evidence_validity_rate": 1.0,
+    "criterion_agreement": 0.7812,
+    "na_agreement": 0.8438,
+    "score_mae": 23.445,
+    "critical_precision": 1.0,
+    "critical_recall": 0.5,
+    "mean_latency_seconds": 156.1444,
+    "failures_by_language": {
+      "EN": 1
+    },
+    "by_language": {
+      "RU": {
+        "cases": 3,
+        "completed": 3,
+        "criterion_agreement": 0.7917
+      },
+      "KZ": {
+        "cases": 3,
+        "completed": 3,
+        "criterion_agreement": 0.6667
+      },
+      "EN": {
+        "cases": 3,
+        "completed": 2,
+        "criterion_agreement": 0.9375
+      }
+    }
+  },
+  "batch": {
+    "id": 3,
+    "checklist_version_id": 1,
+    "created_at": "2026-11-08T04:10:07.352330Z",
+    "total": 9,
+    "queued": 0,
+    "running": 0,
+    "completed": 8,
+    "failed": 1,
+    "cancelled": 0,
+    "percentage": "100.00"
+  },
+  "cases": [
+    {
+      "case": "ru_good",
+      "language": "RU",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6367,
+        "output_tokens": 3252,
+        "latency_ms": 114501,
+        "errors": [],
+        "review_codes": [
+          "external_fact_unverified:01",
+          "external_fact_unverified:02",
+          "external_fact_unverified:03",
+          "external_fact_unverified:04",
+          "external_fact_unverified:05",
+          "external_fact_unverified:06",
+          "external_fact_unverified:07",
+          "external_fact_unverified:08"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": true
+      },
+      "latency_seconds": 114.5,
+      "job_id": 33,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:10:07.939385Z",
+      "completed_at": "2026-11-08T04:12:02.581198Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:10:07.951484Z",
+          "finished_at": "2026-11-08T04:12:02.581198Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 4,
+      "score_error": 30.77,
+      "score": "69.23",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "0",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "04"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "kz_good",
+      "language": "KZ",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 7332,
+        "output_tokens": 4740,
+        "latency_ms": 155597,
+        "errors": [],
+        "review_codes": [
+          "external_fact_unverified:01",
+          "external_fact_unverified:02",
+          "external_fact_unverified:03",
+          "external_fact_unverified:04",
+          "external_fact_unverified:05",
+          "external_fact_unverified:06",
+          "external_fact_unverified:07",
+          "external_fact_unverified:08"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": true
+      },
+      "latency_seconds": 155.6,
+      "job_id": 34,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:10:07.963083Z",
+      "completed_at": "2026-11-08T04:12:43.858466Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:10:07.973410Z",
+          "finished_at": "2026-11-08T04:12:43.858466Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 4,
+      "score_error": 7.69,
+      "score": "92.31",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "15",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "04"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "en_good",
+      "language": "EN",
+      "status": "completed",
+      "metrics": {
+        "requests": 4,
+        "successful_json": 4,
+        "assessment_requests": 2,
+        "schema_valid": 2,
+        "complete_results": 2,
+        "grounded_results": 2,
+        "repairs": 1,
+        "chunk_count": 1,
+        "input_tokens": 12358,
+        "output_tokens": 5428,
+        "latency_ms": 150795,
+        "errors": [
+          "semantic_conflict"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": false
+      },
+      "latency_seconds": 150.79,
+      "job_id": 35,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:12:03.459523Z",
+      "completed_at": "2026-11-08T04:14:34.345426Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:12:03.468875Z",
+          "finished_at": "2026-11-08T04:14:34.345426Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 4,
+      "score_error": 30.77,
+      "score": "69.23",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "0",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "04"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "ru_missing_open_close",
+      "language": "RU",
+      "status": "completed",
+      "metrics": {
+        "requests": 4,
+        "successful_json": 4,
+        "assessment_requests": 2,
+        "schema_valid": 2,
+        "complete_results": 2,
+        "grounded_results": 2,
+        "repairs": 1,
+        "chunk_count": 1,
+        "input_tokens": 12766,
+        "output_tokens": 5791,
+        "latency_ms": 159316,
+        "errors": [
+          "semantic_conflict"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": false
+      },
+      "latency_seconds": 159.32,
+      "job_id": 36,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:12:44.769570Z",
+      "completed_at": "2026-11-08T04:15:24.245923Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:12:44.776452Z",
+          "finished_at": "2026-11-08T04:15:24.245923Z"
+        }
+      ],
+      "matches": 6,
+      "na_matches": 4,
+      "score_error": 15.38,
+      "score": "61.54",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "no",
+        "02": "na",
+        "03": "na",
+        "04": "20",
+        "05": "no",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "05",
+        "07"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "kz_private_offer",
+      "language": "KZ",
+      "status": "completed",
+      "metrics": {
+        "requests": 4,
+        "successful_json": 4,
+        "assessment_requests": 2,
+        "schema_valid": 2,
+        "complete_results": 2,
+        "grounded_results": 2,
+        "repairs": 1,
+        "chunk_count": 1,
+        "input_tokens": 14998,
+        "output_tokens": 8826,
+        "latency_ms": 240285,
+        "errors": [
+          "semantic_conflict"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": false
+      },
+      "latency_seconds": 240.28,
+      "job_id": 37,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:14:35.154946Z",
+      "completed_at": "2026-11-08T04:18:35.495237Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:14:35.162111Z",
+          "finished_at": "2026-11-08T04:18:35.495237Z"
+        }
+      ],
+      "matches": 4,
+      "na_matches": 1,
+      "score_error": 62.5,
+      "score": "37.50",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "no",
+        "03": "no",
+        "04": "na",
+        "05": "no",
+        "06": "10",
+        "07": "yes",
+        "08": "yes"
+      },
+      "disagreements": [
+        "02",
+        "03",
+        "04",
+        "05"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "en_injection_bot_system",
+      "language": "EN",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6254,
+        "output_tokens": 3078,
+        "latency_ms": 84069,
+        "errors": [],
+        "review_codes": [
+          "external_fact_unverified:01",
+          "external_fact_unverified:02",
+          "external_fact_unverified:03",
+          "external_fact_unverified:04",
+          "external_fact_unverified:05",
+          "external_fact_unverified:06",
+          "external_fact_unverified:07",
+          "external_fact_unverified:08"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": true
+      },
+      "latency_seconds": 84.07,
+      "job_id": 38,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:15:24.757161Z",
+      "completed_at": "2026-11-08T04:16:48.865412Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:15:24.763222Z",
+          "finished_at": "2026-11-08T04:16:48.865412Z"
+        }
+      ],
+      "matches": 8,
+      "na_matches": 4,
+      "score_error": 0.0,
+      "score": "84.62",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "no",
+        "02": "na",
+        "03": "na",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [],
+      "grounding_reverified": true
+    },
+    {
+      "case": "ru_identity_unconfirmed",
+      "language": "RU",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6727,
+        "output_tokens": 3070,
+        "latency_ms": 127669,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": false
+      },
+      "latency_seconds": 127.67,
+      "job_id": 39,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:16:49.457223Z",
+      "completed_at": "2026-11-08T04:18:57.168033Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:16:49.465449Z",
+          "finished_at": "2026-11-08T04:18:57.168033Z"
+        }
+      ],
+      "matches": 6,
+      "na_matches": 4,
+      "score_error": 20.0,
+      "score": "100.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "answers": {
+        "01": "yes",
+        "02": "yes",
+        "03": "yes",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "03",
+        "08"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "en_identity_confirmed",
+      "language": "EN",
+      "status": "failed",
+      "metrics": {
+        "requests": 6,
+        "successful_json": 6,
+        "assessment_requests": 3,
+        "schema_valid": 3,
+        "complete_results": 3,
+        "grounded_results": 3,
+        "repairs": 2,
+        "chunk_count": 1,
+        "input_tokens": 19385,
+        "output_tokens": 9381,
+        "latency_ms": 280119,
+        "errors": [
+          "semantic_conflict",
+          "semantic_conflict",
+          "semantic_conflict"
+        ],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6"
+      },
+      "latency_seconds": 280.12,
+      "job_id": 40,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:18:35.813151Z",
+      "completed_at": "2026-11-08T04:23:15.954909Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "failed",
+          "error_code": "semantic_conflict",
+          "started_at": "2026-11-08T04:18:35.820930Z",
+          "finished_at": "2026-11-08T04:23:15.954909Z"
+        }
+      ],
+      "error_code": "semantic_conflict"
+    },
+    {
+      "case": "kz_incomplete",
+      "language": "KZ",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6713,
+        "output_tokens": 3193,
+        "latency_ms": 92954,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.6",
+        "needs_human_review": false
+      },
+      "latency_seconds": 92.95,
+      "job_id": 41,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:18:57.471313Z",
+      "completed_at": "2026-11-08T04:20:30.467429Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:18:57.479838Z",
+          "finished_at": "2026-11-08T04:20:30.467429Z"
+        }
+      ],
+      "matches": 5,
+      "na_matches": 2,
+      "score_error": 20.45,
+      "score": "34.17",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "no",
+        "03": "na",
+        "04": "na",
+        "05": "no",
+        "06": "7",
+        "07": "no",
+        "08": "no"
+      },
+      "disagreements": [
+        "02",
+        "04",
+        "07"
+      ],
+      "grounding_reverified": true
+    }
+  ],
+  "data": "public synthetic reference cases; real AI results persisted via jobs",
+  "batch_measurement": {
+    "elapsed_seconds": 788.02,
+    "terminal_jobs_per_hour": 41.12,
+    "completed_per_hour": 36.55,
+    "method": "final-attempt start to last completion; earlier interrupted deployment attempts listed separately"
+  },
+  "measurement_note": "Includes contention from two bounded synthetic diagnostics during the final cases; do not use this run as isolated throughput measurement.",
+  "code_sha": "6c4882f8ca4e17728c7ba5acba6760bbe8e1e11b",
+  "used_for_prompt_tuning": true
+}

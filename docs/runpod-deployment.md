@@ -1,83 +1,120 @@
-# RunPod deployment procedure
+# RunPod deployment
 
-**Статус: локально проверенный инструментарий, remote deployment ожидает SSH.** Ниже процедура для существующего Pod, а не утверждение о выполненных серверных командах. Не создавайте новый платный Pod.
+Проверено 2026-11-08 на существующем Pod `f05y0qgekhw7ag`. Новый Pod не создавался.
+Вход: https://f05y0qgekhw7ag-8080.proxy.runpod.net (HTTPS + Basic Auth).
 
-## 1. Доступ и preflight
+## Фактическое окружение
 
-Приватный ключ остаётся на CachyOS. Разблокируйте его через `ssh-add` в локальном терминале. Затем используйте BatchMode/IdentitiesOnly и текущий gateway из задачи. Если gateway не поддерживает exec/SCP, используйте интерактивный SSH или актуальный Direct TCP SSH из Connect; не угадывайте IP/порт.
+- NVIDIA RTX 4090, 24564 MiB VRAM; драйвер 595.91.07, CUDA 13.2.
+- Ubuntu 24.04.5; memory cgroup 124999999488 bytes, CPU quota 31.125 cores.
+- Network volume `te2bym73hq` смонтирован в `/workspace` через RunPod FUSE.
+- Container overlay 100 GB временный. `df` network volume показывает общий pool,
+  а не подтверждённую квоту аккаунта; квоту нужно смотреть в Console.
+- Python 3.12.15 (uv managed), uv 0.13.4, Node 24.22.2, Supervisor 4.3.0,
+  Ollama 0.40.15. Зависимости приложения установлены из `uv.lock` и `package-lock.json`.
+- Модель `qwen3:14b`, Q4_K_M, 9.3 GB; native Ollama API. Драйверы не менялись.
 
-На Pod проверить `nvidia-smi`, `/etc/os-release`, `uname -a`, `free -h`, `df -h`, `lsblk`, `findmnt`, `ss -ltnp`, Python/uv, Node/npm, Git/curl, supervisor/nginx и существующий startup/Jupyter. Не печатать весь environment и командные строки с Jupyter tokens. Jupyter:8888 оставить на месте и проверить его защиту.
+Mount подтверждён через `findmnt`, а не по одному имени `/workspace`.
+[RunPod storage lifecycle](https://docs.runpod.io/pods/storage/types).
+SQLite DELETE journal прошёл проверку межпроцессных блокировок и конкурентных commits.
+WAL на этом сетевом mount не включать. [SQLite WAL](https://www.sqlite.org/wal.html).
 
-Подтвердить mount **по настройкам Pod и `findmnt`**, включая поведение при stop/restart и удалении. Container disk нельзя считать постоянным. Volume disk и network volume имеют разный lifecycle; название `/workspace` само по себе не является доказательством. [RunPod storage](https://docs.runpod.io/pods/storage/types).
+## Каталоги и секреты
 
-Текущий backend не включает WAL принудительно. Для SQLite нужна проверенная POSIX-блокировка на выбранном mount и один host. Не включать WAL на сетевой ФС автоматически. Сначала проверить конкурентные операции и backup на синтетической копии. [SQLite WAL](https://www.sqlite.org/wal.html).
+`/workspace/cqa`: `releases/<full SHA>/`, `data/cqa.db`, `models/`, `backups/`,
+`logs/`, `config/`, `tools/`, `python/`, `secrets.vault`, `bootstrap.sh`.
+Текущий checkout указан в `config/runtime.json`.
 
-## 2. Постоянные пути и непривилегированный пользователь
+FUSE не применяет chmod/chown. Поэтому `secrets` и `run` — ссылки в приватный
+`/run/cqa`; там настоящий mode0700/0600. Секреты переносятся между запусками только
+в AES-256-GCM vault. Ключ отсутствует на network volume и в Git. База и backups
+защищены приватностью RunPod volume/account; шифрование базы приложением не реализовано.
+См. [security](production-security.md).
 
-Дальнейшие переменные задаются **фактическими значениями после preflight**, а не путями из примера:
+Сервисный пользователь `cqa` UID2001. Root нужен только bootstrap/admin;
+API, worker, Ollama, CQA nginx и backup listener работают от `cqa`.
 
-- `CQA_ROOT`: отдельный каталог на подтверждённом persistent mount.
-- `CQA_SHA`: полный SHA проверенного release commit.
-- `CQA_RELEASE`: `$CQA_ROOT/releases/<full-git-sha>`.
-- `CQA_HOST`: подтверждённый HTTP proxy hostname из RunPod Connect, без scheme/path.
-- `CQA_MODEL`: модель, выбранная после измерения GPU; 14B — предпочтение, не уже выбранный результат.
+## Доступ и обновление
 
-Структура: `releases/`, `data/cqa.db`, `secrets/backend.env`, `secrets/access.json`, `secrets/access.htpasswd`, `models/`, `backups/`, `logs/`, `config/`, `run/`, `tools/`, `python/`.
+Приватный SSH-ключ остаётся на CachyOS и разблокируется SSH Agent.
+Gateway требует PTY. Direct TCP SSH IP/порт меняются после Console reset —
+проверять Connect/gateway и fingerprint, не отключать проверку host key.
 
-Создать отдельного непривилегированного service user с доступом к GPU device nodes и владением **только новым каталогом CQA**. Не делать `chown -R` всего общего mount. Каталоги 0700, секреты 0600. Launcher откажется запускать приложение от root.
-
-## 3. Зависимости и release
-
-Установить nginx, OpenSSL и uv способом, подходящим проверенному образу Pod. Systemd и Docker-in-Docker не требуются. Python/uv tools держать на persistent storage; бинарники OS из ephemeral слоя должны восстанавливаться штатным startup, не через ручной SSH при каждом старте. Конкретный lifecycle пока не проверен.
-
-От имени service user, после установки uv/Git/Node ≥22.12:
+При обновлении создать новый checkout на **фиксированном SHA**, не менять файлы
+работающего release. От service user, с уже установленными инструментами:
 
 ```bash
+export CQA_ROOT=/workspace/cqa
+# Указать полный SHA проверенного коммита:
+export CQA_RELEASE="$CQA_ROOT/releases/$CQA_SHA"
+export PATH="$CQA_ROOT/tools/node/bin:$CQA_ROOT/tools/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin"
 export UV_PYTHON_INSTALL_DIR="$CQA_ROOT/python"
 export UV_CACHE_DIR="$CQA_ROOT/cache"
-export UV_TOOL_DIR="$CQA_ROOT/tools/uv"
-export UV_TOOL_BIN_DIR="$CQA_ROOT/tools/bin"
+export UV_LINK_MODE=copy
 git clone https://github.com/mqw011/freedom_case.git "$CQA_RELEASE"
 git -C "$CQA_RELEASE" checkout --detach "$CQA_SHA"
 uv sync --directory "$CQA_RELEASE/backend" --locked --python 3.12
-uv tool install 'supervisor==4.3.0'
 cd "$CQA_RELEASE/frontend"
 npm ci
 VITE_API_BASE_URL=/api VITE_DEMO_MODE=false npm run build
 ```
 
-`CQA_SHA` — точный проверенный commit; не использовать движущийся `main` как идентификатор deployment. При приватном репозитории передать release artifact через SSH, без личного ключа на Pod.
-
-## 4. Конфигурация, БД, вход
-
-Следующие команды реализованы и проверены локально; значения Pod ещё не определены:
+Перед переключением остановить worker штатно и сделать Backup API snapshot.
+Не копировать активную SQLite одиночным `cp`. Перенос исходного DEV выполнен с
+разрешения владельца, по SSH, с проверкой SHA256 и всех 16 таблиц.
 
 ```bash
 cd "$CQA_RELEASE"
 python3 scripts/production_config.py render \
-  --root "$CQA_ROOT" --release "$CQA_RELEASE" --host "$CQA_HOST" \
-  --model "$CQA_MODEL" --port 8080 \
-  --nginx /usr/sbin/nginx --ollama "$CQA_ROOT/tools/bin/ollama"
-python3 scripts/production_config.py credentials --root "$CQA_ROOT"
+  --root "$CQA_ROOT" --release "$CQA_RELEASE" \
+  --host f05y0qgekhw7ag-8080.proxy.runpod.net \
+  --model qwen3:14b --port 8080 --api-port 18000 \
+  --nginx /usr/sbin/nginx --ollama "$CQA_ROOT/tools/bin/ollama" --enable-worker
 "$CQA_RELEASE/backend/.venv/bin/python" scripts/production_service.py --root "$CQA_ROOT" migrate
 "$CQA_RELEASE/backend/.venv/bin/python" scripts/production_service.py --root "$CQA_ROOT" check
-nginx -t -c "$CQA_ROOT/config/nginx.conf"
-"$CQA_ROOT/tools/bin/supervisord" -c "$CQA_ROOT/config/supervisord.conf"
-"$CQA_ROOT/tools/bin/supervisorctl" -c "$CQA_ROOT/config/supervisord.conf" status
+"$CQA_ROOT/tools/bin/supervisorctl" -c "$CQA_ROOT/config/supervisord.conf" reread
+"$CQA_ROOT/tools/bin/supervisorctl" -c "$CQA_ROOT/config/supervisord.conf" update
+"$CQA_ROOT/tools/bin/supervisorctl" -c "$CQA_ROOT/config/supervisord.conf" signal HUP proxy
 ```
 
-Пути nginx/mime.types/ollama уточнить по preflight. Генератор НЕ переписывает backend.env и credentials. Первый запуск — пустая мигрированная SQLite и явный импорт синтетического JSON. Настоящий DEV и organizer URL разрешены только после подтверждения обработки данных. Миграции существующей БД выполнять после backup. Старые queued jobs сначала аудировать: они содержат закреплённые модели/версии/config, смена LLM_MODEL их не перепишет.
+Генератор не переписывает backend.env или пароль. `--enable-worker` применять только
+после аудита очереди. Смена env не переписывает параметры уже созданных jobs.
+При изменении секретов требуется повторный `production_vault.py seal`, иначе будущий
+bootstrap восстановит прежний env. Ключ передавать через mode0600 файл или защищённую
+переменную, никогда аргументом со значением и никогда через shell `source`.
 
-Ollama установить по [официальной Linux инструкции](https://docs.ollama.com/linux), без изменения NVIDIA driver. Бинарники/модели сохранять в persistent paths. Проверить `ollama ps` и `nvidia-smi`: наличие модели на диске не означает GPU inference. Подбирать context/output/timeout на измерениях. Не скачивать сразу несколько моделей.
+## Порты и сохранённые сервисы
 
-После аудита очереди повторить `render` с `--enable-worker`, выполнить `supervisorctl reread` и `supervisorctl update`. AI_AUTO_START_WORKER остаётся false; отдельный worker autostart=true. При изменении env перезапускать нужные сервисы через Supervisor.
+- HTTP8080 открыт в RunPod proxy; HTTP8888 Jupyter сохранён.
+- FastAPI слушает **127.0.0.1:18000**, Ollama **127.0.0.1:11434**.
+- Порт 8000 намеренно не используется: образ содержит существующий proxy 8001 → 8000.
+- Не открывать 8080 как Direct TCP: HTTPS терминируется RunPod proxy, CQA nginx доверяет
+  forwarded-proto только в этой топологии.
+- Штатные `/start.sh`, nginx и Jupyter не заменяются; Jupyter имеет отдельную аутентификацию.
 
-## 5. HTTP proxy и lifecycle
+[RunPod HTTP ports](https://docs.runpod.io/pods/configuration/expose-ports).
+Провайдер ограничивает длительность HTTP-запроса; AI API быстро возвращает job ID,
+долгий inference выполняет отдельный worker.
 
-Порт 8080 — пример свободного HTTP-порта; подтвердить его в Expose HTTP Ports. Не добавлять 8000/11434 или proxy:8080 в Direct TCP. HTTP proxy формирует HTTPS URL; доступ публичный, поэтому поверх него обязателен Nginx Basic Auth. Проверить фактический `X-Forwarded-Proto: https`; без него конфигурация перенаправляет на HTTPS. [RunPod expose ports](https://docs.runpod.io/pods/configuration/expose-ports).
+## Lifecycle — отложен владельцем
 
-Nginx доверяет forwarded proto **только при условии отсутствия публичного TCP-обхода**. Локальная подмена заголовка не является внешней TLS-защитой. Обязательно проверить внешним клиентом отказ без пароля и отсутствие bypass ports. Подключить Supervisor к существующему startup Pod, сохранив Jupyter. Это действие и полный restart Pod пока НЕ проверены и остаются условиями приёмки.
+Supervisor работает без открытого SSH и восстанавливает дочерние сервисы.
+**Автоматическое восстановление всего приложения после restart/redeploy Pod пока
+не активировано и не считается проверенным.** Владелец попросил отложить этот пункт.
 
-## 6. Приёмка
+Для завершения позже: Start Command `/bin/bash /workspace/cqa/bootstrap.sh` и
+`CQA_VAULT_KEY` в защищённых переменных Pod. Значение ключа хранится у владельца
+в локальном mode0600 файле, не в документации. Затем сделать backup и реальный restart test.
 
-Защищённый внешний smoke, реальные inference/benchmark, [операции](production-operations.md), [backup/restore](production-backup.md), контрольный набор и freeze обязательны перед Ready tag. Локальный self-signed TLS тест не подтверждает сертификат RunPod.
+До настройки автозапуска после Pod reset нужен ручной bootstrap: передать локальный
+ключ по SSH в `/run/cqa-vault-key` mode0600, выполнить от root:
+
+```bash
+CQA_RELEASE=$(python3 -c 'import json; print(json.load(open("/workspace/cqa/config/runtime.json"))["release"])')
+"$CQA_RELEASE/backend/.venv/bin/python" "$CQA_RELEASE/scripts/production_bootstrap.py" \
+  --root /workspace/cqa --key-file /run/cqa-vault-key --start-services-only
+```
+
+Команда восстанавливает приватный runtime и Supervisor; уже работающий Jupyter не
+перезапускает. Не удалять persistent vault или базу. Rollback приложения не откатывает БД.
+Финальные фактические результаты: [Stage 4 report](../README_STAGE4.md).

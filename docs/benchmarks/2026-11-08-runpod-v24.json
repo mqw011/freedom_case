@@ -1,0 +1,648 @@
+{
+  "provider": "ollama",
+  "model": "qwen3:14b",
+  "prompt_version": "cqa-2.4",
+  "context_length": 32768,
+  "thinking": true,
+  "temperature": 0.6,
+  "max_output_tokens": 8192,
+  "max_repairs": 2,
+  "concurrency": 2,
+  "expected_cases": 9,
+  "run_complete": true,
+  "summary": {
+    "sample_size": 9,
+    "completed": 9,
+    "failed": 0,
+    "valid_json_rate": 1.0,
+    "schema_validation_rate": 1.0,
+    "criterion_completion_rate": 1.0,
+    "evidence_validity_rate": 0.9,
+    "criterion_agreement": 0.8889,
+    "na_agreement": 0.9167,
+    "score_mae": 10.7322,
+    "critical_precision": 1.0,
+    "critical_recall": 0.5,
+    "mean_latency_seconds": 97.7867,
+    "failures_by_language": {},
+    "by_language": {
+      "RU": {
+        "cases": 3,
+        "completed": 3,
+        "criterion_agreement": 0.8333
+      },
+      "KZ": {
+        "cases": 3,
+        "completed": 3,
+        "criterion_agreement": 0.875
+      },
+      "EN": {
+        "cases": 3,
+        "completed": 3,
+        "criterion_agreement": 0.9583
+      }
+    }
+  },
+  "batch": {
+    "id": 2,
+    "checklist_version_id": 1,
+    "created_at": "2026-11-08T03:39:53.557622Z",
+    "total": 9,
+    "queued": 0,
+    "running": 0,
+    "completed": 9,
+    "failed": 0,
+    "cancelled": 0,
+    "percentage": "100.00"
+  },
+  "cases": [
+    {
+      "case": "ru_good",
+      "language": "RU",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 5697,
+        "output_tokens": 3041,
+        "latency_ms": 86979,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": false
+      },
+      "latency_seconds": 86.98,
+      "job_id": 21,
+      "attempts": 3,
+      "started_at": "2026-11-08T03:55:12.584123Z",
+      "completed_at": "2026-11-08T03:56:39.661679Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "failed",
+          "error_code": "worker_stopped",
+          "started_at": "2026-11-08T03:46:14.876037Z",
+          "finished_at": "2026-11-08T03:46:26.592745Z"
+        },
+        {
+          "attempt_number": 2,
+          "status": "failed",
+          "error_code": "worker_stopped",
+          "started_at": "2026-11-08T03:54:02.318774Z",
+          "finished_at": "2026-11-08T03:54:05.251485Z"
+        },
+        {
+          "attempt_number": 3,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T03:55:12.598238Z",
+          "finished_at": "2026-11-08T03:56:39.661679Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 3,
+      "score_error": 0.0,
+      "score": "100.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "na",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "04"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "kz_good",
+      "language": "KZ",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6461,
+        "output_tokens": 3885,
+        "latency_ms": 110022,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": false
+      },
+      "latency_seconds": 110.02,
+      "job_id": 22,
+      "attempts": 1,
+      "started_at": "2026-11-08T03:55:12.610815Z",
+      "completed_at": "2026-11-08T03:57:02.883967Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T03:55:12.617112Z",
+          "finished_at": "2026-11-08T03:57:02.883967Z"
+        }
+      ],
+      "matches": 8,
+      "na_matches": 4,
+      "score_error": 0.0,
+      "score": "100.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [],
+      "grounding_reverified": true
+    },
+    {
+      "case": "en_good",
+      "language": "EN",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 5408,
+        "output_tokens": 2418,
+        "latency_ms": 67691,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": false
+      },
+      "latency_seconds": 67.69,
+      "job_id": 23,
+      "attempts": 1,
+      "started_at": "2026-11-08T03:56:40.563378Z",
+      "completed_at": "2026-11-08T03:57:48.292974Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T03:56:40.569930Z",
+          "finished_at": "2026-11-08T03:57:48.292974Z"
+        }
+      ],
+      "matches": 8,
+      "na_matches": 4,
+      "score_error": 0.0,
+      "score": "100.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [],
+      "grounding_reverified": true
+    },
+    {
+      "case": "ru_missing_open_close",
+      "language": "RU",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 5552,
+        "output_tokens": 3722,
+        "latency_ms": 101901,
+        "errors": [],
+        "review_codes": [
+          "external_fact_unverified:01",
+          "external_fact_unverified:02",
+          "external_fact_unverified:03",
+          "external_fact_unverified:04",
+          "external_fact_unverified:05",
+          "external_fact_unverified:06",
+          "external_fact_unverified:07",
+          "external_fact_unverified:08"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": true
+      },
+      "latency_seconds": 101.9,
+      "job_id": 24,
+      "attempts": 1,
+      "started_at": "2026-11-08T03:57:03.366805Z",
+      "completed_at": "2026-11-08T03:58:45.371370Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T03:57:03.373832Z",
+          "finished_at": "2026-11-08T03:58:45.371370Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 4,
+      "score_error": 30.77,
+      "score": "46.15",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "no",
+        "02": "na",
+        "03": "na",
+        "04": "0",
+        "05": "yes",
+        "06": "10",
+        "07": "no",
+        "08": "no"
+      },
+      "disagreements": [
+        "04"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "kz_private_offer",
+      "language": "KZ",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6777,
+        "output_tokens": 4786,
+        "latency_ms": 130820,
+        "errors": [],
+        "review_codes": [
+          "external_fact_unverified:01"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": true
+      },
+      "latency_seconds": 130.82,
+      "job_id": 25,
+      "attempts": 1,
+      "started_at": "2026-11-08T03:57:48.864546Z",
+      "completed_at": "2026-11-08T03:59:59.786684Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T03:57:48.869092Z",
+          "finished_at": "2026-11-08T03:59:59.786684Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 4,
+      "score_error": 23.08,
+      "score": "76.92",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "5",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "yes"
+      },
+      "disagreements": [
+        "04"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "en_injection_bot_system",
+      "language": "EN",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 5583,
+        "output_tokens": 2978,
+        "latency_ms": 83322,
+        "errors": [],
+        "review_codes": [
+          "external_fact_unverified:01",
+          "external_fact_unverified:02",
+          "external_fact_unverified:03",
+          "external_fact_unverified:04",
+          "external_fact_unverified:05",
+          "external_fact_unverified:06",
+          "external_fact_unverified:07",
+          "external_fact_unverified:08"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": true
+      },
+      "latency_seconds": 83.32,
+      "job_id": 26,
+      "attempts": 1,
+      "started_at": "2026-11-08T03:58:45.583535Z",
+      "completed_at": "2026-11-08T04:00:09.045007Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T03:58:45.588431Z",
+          "finished_at": "2026-11-08T04:00:09.045007Z"
+        }
+      ],
+      "matches": 8,
+      "na_matches": 4,
+      "score_error": 0.0,
+      "score": "84.62",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "no",
+        "02": "na",
+        "03": "na",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [],
+      "grounding_reverified": true
+    },
+    {
+      "case": "ru_identity_unconfirmed",
+      "language": "RU",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 5962,
+        "output_tokens": 3780,
+        "latency_ms": 103219,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": false
+      },
+      "latency_seconds": 103.22,
+      "job_id": 27,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:00:00.788550Z",
+      "completed_at": "2026-11-08T04:01:44.145413Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:00:00.843700Z",
+          "finished_at": "2026-11-08T04:01:44.145413Z"
+        }
+      ],
+      "matches": 6,
+      "na_matches": 4,
+      "score_error": 20.0,
+      "score": "100.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "answers": {
+        "01": "yes",
+        "02": "yes",
+        "03": "yes",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "03",
+        "08"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "en_identity_confirmed",
+      "language": "EN",
+      "status": "completed",
+      "metrics": {
+        "requests": 3,
+        "successful_json": 3,
+        "assessment_requests": 2,
+        "schema_valid": 2,
+        "complete_results": 2,
+        "grounded_results": 1,
+        "repairs": 1,
+        "chunk_count": 1,
+        "input_tokens": 7973,
+        "output_tokens": 3853,
+        "latency_ms": 105897,
+        "errors": [
+          "invalid_evidence"
+        ],
+        "review_codes": [
+          "external_fact_unverified:01",
+          "external_fact_unverified:02",
+          "external_fact_unverified:03",
+          "external_fact_unverified:04",
+          "external_fact_unverified:05",
+          "external_fact_unverified:06",
+          "external_fact_unverified:07",
+          "external_fact_unverified:08"
+        ],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": true
+      },
+      "latency_seconds": 105.9,
+      "job_id": 28,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:00:09.065540Z",
+      "completed_at": "2026-11-08T04:01:55.055423Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:00:09.069818Z",
+          "finished_at": "2026-11-08T04:01:55.055423Z"
+        }
+      ],
+      "matches": 7,
+      "na_matches": 3,
+      "score_error": 0.0,
+      "score": "100.00",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "na",
+        "03": "na",
+        "04": "20",
+        "05": "yes",
+        "06": "10",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "03"
+      ],
+      "grounding_reverified": true
+    },
+    {
+      "case": "kz_incomplete",
+      "language": "KZ",
+      "status": "completed",
+      "metrics": {
+        "requests": 2,
+        "successful_json": 2,
+        "assessment_requests": 1,
+        "schema_valid": 1,
+        "complete_results": 1,
+        "grounded_results": 1,
+        "repairs": 0,
+        "chunk_count": 1,
+        "input_tokens": 6607,
+        "output_tokens": 3673,
+        "latency_ms": 90230,
+        "errors": [],
+        "review_codes": [],
+        "response_modes": [
+          "json_schema"
+        ],
+        "prompt_version": "cqa-2.4",
+        "needs_human_review": false
+      },
+      "latency_seconds": 90.23,
+      "job_id": 29,
+      "attempts": 1,
+      "started_at": "2026-11-08T04:01:45.068720Z",
+      "completed_at": "2026-11-08T04:03:15.397155Z",
+      "attempt_history": [
+        {
+          "attempt_number": 1,
+          "status": "completed",
+          "error_code": null,
+          "started_at": "2026-11-08T04:01:45.074921Z",
+          "finished_at": "2026-11-08T04:03:15.397155Z"
+        }
+      ],
+      "matches": 6,
+      "na_matches": 3,
+      "score_error": 22.74,
+      "score": "31.88",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "answers": {
+        "01": "yes",
+        "02": "no",
+        "03": "na",
+        "04": "0",
+        "05": "no",
+        "06": "7",
+        "07": "yes",
+        "08": "no"
+      },
+      "disagreements": [
+        "02",
+        "04"
+      ],
+      "grounding_reverified": true
+    }
+  ],
+  "data": "public synthetic reference cases; real AI results persisted via jobs",
+  "batch_measurement": {
+    "elapsed_seconds": 482.81,
+    "terminal_jobs_per_hour": 67.11,
+    "completed_per_hour": 67.11,
+    "method": "final-attempt start to last completion; earlier interrupted deployment attempts listed separately"
+  }
+}

@@ -48,17 +48,6 @@ unresolved question if no such question was asked. Do not require external sourc
 observable transcript facts or a simple language preference. A short correctly resolved request
 can meet the maximum scale level. Assess the configured rubric, not hypothetical services the
 client never requested.
-Conversational service requests (language, acknowledgement, routing or format) are still actual
-requests unless the checklist explicitly excludes them. Do not assume the client intended an
-unstated financial question. Check the first client turn before accepting 'no request formulated';
-later thanks or goodbye cannot erase an earlier request. A low consultation step must correspond
-to an actual unanswered request or incorrect answer, not an unrelated violation from another item.
-Distinguish a requirement being satisfied from its not being applicable. When the criterion
-requires confirmed identity for protected data, prior system authentication supports compliance,
-not N/A. Merely asking for or receiving an account number does NOT confirm identity. Reject a
-claim of confirmed verification if its only evidence is collecting an identifier. Independently
-check any configured confidentiality flag when account-specific data is disclosed without verified
-authorization; a client's ownership claim alone is not verification.
 """
     # Keep the original prefix intact so local runtimes can reuse its KV cache.
     # This system message is application-owned, never derived from the transcript.
